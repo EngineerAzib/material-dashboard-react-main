@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
 =========================================================
 * Material Dashboard 2 React - v2.2.0
@@ -39,12 +40,19 @@ Coded by www.creative-tim.com
 import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
 import CategoryProduct from "layouts/CategoryProduct/CategoryProduct.js";
+import DineTable from "layouts/DineTable/DineTable.js";
+import StaffTable from "layouts/Staff/StaffTable.js";
+import Product from "layouts/Product/Product";
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
+import CategoryIcon from '@mui/icons-material/Category';
+import DinnerDiningIcon from '@mui/icons-material/DinnerDining';
+import GroupIcon from '@mui/icons-material/Group';
+import StoreIcon from '@mui/icons-material/Store';
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -59,20 +67,39 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "CategoryProduct",
-    key: "CategoryProduct",
-    icon: <Icon fontSize="small">CategoryProduct</Icon>,
-    route: "/CategoryProduct",
+    name: "Category Products",
+    key: "category-products",
+    icon: <CategoryIcon fontSize="small" />,
+    route: "/categoryproduct",
     component: <CategoryProduct />,
   },
   {
     type: "collapse",
-    name: "Tables",
-    key: "tables",
-    icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/tables",
-    component: <Tables />,
+    name: "Dine Tables",
+    key: "dine-tables",
+    icon: <DinnerDiningIcon fontSize="small" />,
+    route: "/dinetables",
+    component: <DineTable />,
   },
+  {
+    type: "collapse",
+    name: "Staff",
+    key: "staff",
+    icon: <GroupIcon fontSize="small" />,
+    route: "/staff",
+    component: <StaffTable />, 
+  },
+  
+  
+  {
+    type: "collapse",
+    name: "Products",
+    key: "products",
+    icon: <StoreIcon fontSize="small" />,
+    route: "/products",
+    component: <Product />,
+  },
+
   {
     type: "collapse",
     name: "Billing",
