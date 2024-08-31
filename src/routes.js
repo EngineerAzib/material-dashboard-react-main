@@ -43,6 +43,7 @@ import CategoryProduct from "layouts/CategoryProduct/CategoryProduct.js";
 import DineTable from "layouts/DineTable/DineTable.js";
 import StaffTable from "layouts/Staff/StaffTable.js";
 import Product from "layouts/Product/Product";
+import Supplier from "layouts/supplier/supplier"
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -53,6 +54,8 @@ import CategoryIcon from '@mui/icons-material/Category';
 import DinnerDiningIcon from '@mui/icons-material/DinnerDining';
 import GroupIcon from '@mui/icons-material/Group';
 import StoreIcon from '@mui/icons-material/Store';
+import SupplierIcon from '@mui/icons-material/Business';
+
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -98,6 +101,14 @@ const routes = [
     icon: <StoreIcon fontSize="small" />,
     route: "/products",
     component: <Product />,
+  },
+  {
+    type: "collapse",
+    name: "Supplier",
+    key: "supplier",
+    icon: <SupplierIcon fontSize="small" />,
+    route: "/supplier",
+    component: <Supplier />,
   },
 
   {
