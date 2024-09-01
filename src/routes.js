@@ -45,6 +45,8 @@ import StaffTable from "layouts/Staff/StaffTable.js";
 import Product from "layouts/Product/Product";
 import Supplier from "layouts/supplier/supplier"
 import Billing from "layouts/billing";
+import PaymentManagement from "layouts/Payment/payment";
+import DocumentTypeManagement from "layouts/DocumentType/DocumentType"
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
@@ -55,10 +57,13 @@ import DinnerDiningIcon from '@mui/icons-material/DinnerDining';
 import GroupIcon from '@mui/icons-material/Group';
 import StoreIcon from '@mui/icons-material/Store';
 import SupplierIcon from '@mui/icons-material/Business';
+import PaymentIcon from '@mui/icons-material/Payment';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 
 // @mui icons
 import Icon from "@mui/material/Icon";
+
 const routes = [
   {
     type: "collapse",
@@ -91,6 +96,22 @@ const routes = [
     icon: <GroupIcon fontSize="small" />,
     route: "/staff",
     component: <StaffTable />, 
+  },
+  {
+    type: "collapse",
+    name: "Payment",
+    key: "Payment",
+    icon: <PaymentIcon fontSize="small" />,
+    route: "/Payment",
+    component: <PaymentManagement />, 
+  },
+  {
+    type: "collapse",
+    name: "DocumentType",
+    key: "DocumentType",
+    icon: <DescriptionIcon fontSize="small" />,
+    route: "/DocumentType",
+    component: <DocumentTypeManagement />, 
   },
   
   
