@@ -26,7 +26,11 @@ import Icon from "@mui/material/Icon";
 import { Navigate } from "react-router-dom";
 
 // Replace this with your actual authentication check logic
-const isAuthenticated = () => !!localStorage.getItem('authToken');
+const isAuthenticated = () => !!localStorage.getItem('accessToken');
+
+// Log the result to the console
+console.log('Is user authenticated?', isAuthenticated());
+
 
 const routes = [
   {
@@ -60,6 +64,7 @@ const routes = [
     icon: <GroupIcon fontSize="small" />,
     route: "/staff",
     component: isAuthenticated() ? <StaffTable /> : <Navigate to="/authentication/sign-in" />,
+
   },
   {
     type: "collapse",
@@ -77,6 +82,7 @@ const routes = [
     route: "/DocumentType",
     component: isAuthenticated() ? <DocumentTypeManagement /> : <Navigate to="/authentication/sign-in" />,
   },
+>>>>>>> Payment
   {
     type: "collapse",
     name: "Products",

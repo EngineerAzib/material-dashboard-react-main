@@ -133,13 +133,6 @@ function Footer({ light }) {
 }
 
 // Setting default props for the Footer
-Footer.defaultProps = {
-  light: false,
-};
 
-// Typechecking props for the Footer
-Footer.propTypes = {
-  light: PropTypes.bool,
-};
 
 export default Footer;
