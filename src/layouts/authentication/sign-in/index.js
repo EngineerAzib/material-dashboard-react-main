@@ -32,40 +32,34 @@ function Basic() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await axios.post("https://localhost:7171/api/Auth/login", {
         email,
         password,
       });
-
-      console.log(response); // Log the full response for debugging
-
+  
+      console.log(response); // Debugging ke liye full response log karein
+  
       if (response.status === 200 && response.data.token) {
         toast.success("Login successful!"); // Success toast
-
+  
         // Save tokens to localStorage
-        localStorage.setItem("accessToken", response.data.token); // Adjusted to `token` based on response
-        // localStorage.setItem("refreshToken", response.data.refreshToken); // If applicable
-      console.log("Saved Access Token:", localStorage.getItem("accessToken"));
-      if (response.data.token) {
         localStorage.setItem("accessToken", response.data.token);
+        
+        // Directly navigate to dashboard
         navigate("/dashboard");
-      } 
-      else {
-        navigate("/signin");
-        toast.error("Something went wrong with authentication.");
-      }
-      
-       // Delay for better UX, allow toast to show
+        
       } else {
-        toast.error("Incorrect email or password"); // Error toast for invalid login
+        toast.error("Incorrect email or password"); // Invalid login ke liye error toast
       }
     } catch (error) {
-      console.error(error); // Log error for debugging
-      toast.error("Something went wrong. Please try again."); // Error toast for failure
+      console.error(error); // Error log karein
+      toast.error("Something went wrong. Please try again."); // Failure ke liye error toast
     }
   };
+  
+  
 
   return (
     <>
