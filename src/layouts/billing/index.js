@@ -1,143 +1,208 @@
-// @mui material components
-import Grid from "@mui/material/Grid";
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 
-// Material Dashboard 2 React components
-import MDBox from "components/MDBox";
-import MDInput from "components/MDInput";
-import MDButton from "components/MDButton";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-// Material Dashboard 2 React examples
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
-
-function Billing() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get("https://localhost:7171/GetProduct");
-      setProducts(response.data || []);
-    } catch (error) {
-      toast.error("Failed to fetch product data.");
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get("https://localhost:7171/GetCategory");
-      setCategories(response.data || []);
-    } catch (error) {
-      toast.error("Failed to fetch categories.");
-    }
-  };
-
-  const handlePriceChange = (index, value) => {
-    const updatedProducts = [...products];
-    updatedProducts[index].price = value;
-    setProducts(updatedProducts);
-  };
-
-  const handleAddToCart = (product) => {
-    toast.success(`${product.name} added to cart!`);
-  };
+// Main Component
+const Billing = () => {
+  const [products, setProducts] = useState([
+    { name: "Pant 29 inch", quantity: 1, price: 1080.0, amount: 1080.0 },
+  ]);
 
   return (
-    <DashboardLayout>
-      <DashboardNavbar absolute isMini />
-      <MDBox mt={8}>
-        <MDBox mb={3}>
-          <Grid container spacing={3}>
+    <div style={styles.container}>
+      {/* Search Bar */}
+      <div style={styles.header}>
+        <input
+          type="text"
+          placeholder="🔍 Search products by name, code or barcode"
+          style={styles.searchBar}
+        />
+      </div>
+
+      {/* Product Table */}
+      <div style={styles.productContainer}>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.tableHeader}>Product Name</th>
+              <th style={styles.tableHeader}>Quantity</th>
+              <th style={styles.tableHeader}>Price</th>
+              <th style={styles.tableHeader}>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
             {products.map((product, index) => (
-              <Grid item xs={12} md={6} xl={3} key={product.id}>
-                <MDBox
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  border="1px solid #ddd"
-                  borderRadius="12px"
-                  boxShadow="0 4px 8px rgba(0, 0, 0, 0.1)"
-                  padding="20px"
-                  textAlign="center"
-                  backgroundColor="#fff"
-                >
-                  <img
-                    src={
-                      product.image.includes('/images/')
-                        ? `https://localhost:7171${product.image}`
-                        : product.image
-                    }
-                    alt={product.name}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://via.placeholder.com/150";
-                    }}
-                    style={{
-                      width: "80%",
-                      height: "auto",
-                      marginBottom: "16px",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <h3 style={{ fontSize: "1.5rem", fontWeight: "bold", margin: "10px 0", color: "#344767" }}>
-                    {product.name}
-                  </h3>
-                  <p style={{ margin: "5px 0", color: "#6c757d" }}>Category: {product.categoryName}</p>
-                  <p style={{ margin: "5px 0", color: "#6c757d" }}>Quantity: {product.quantity}</p>
-                  <MDInput
-                    type="number"
-                    label="Price"
-                    value={product.price}
-                    onChange={(e) => handlePriceChange(index, e.target.value)}
-                    fullWidth
-                    InputLabelProps={{
-                      style: { color: "#6c757d" },
-                    }}
-                    inputProps={{
-                      style: {
-                        color: "#495057",
-                        fontWeight: "500",
-                        padding: "10px 12px",
-                      },
-                    }}
-                    style={{ margin: "10px 0" }}
-                  />
-                  <MDButton
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleAddToCart(product)}
-                    fullWidth
-                    style={{
-                      marginTop: "16px",
-                      padding: "12px",
-                      fontWeight: "bold",
-                      backgroundColor: "#f44336",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    ADD TO CART
-                  </MDButton>
-                </MDBox>
-              </Grid>
+              <tr key={index}>
+                <td style={styles.tableCell}>{product.name}</td>
+                <td style={styles.tableCell}>{product.quantity}</td>
+                <td style={styles.tableCell}>{product.price.toFixed(2)}</td>
+                <td style={styles.tableCell}>{product.amount.toFixed(2)}</td>
+              </tr>
             ))}
-          </Grid>
-        </MDBox>
-      </MDBox>
-      <Footer />
-      <ToastContainer />
-    </DashboardLayout>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Totals Section */}
+      <div style={styles.totalsContainer}>
+        <div style={styles.totalsText}>
+          <p>Subtotal: 1,080.00</p>
+          <p>Tax: 0.00</p>
+          <h2>Total: 1,080.00</h2>
+        </div>
+      </div>
+
+      {/* Payment & Actions */}
+      <div style={styles.actionSection}>
+        <div style={styles.actionLeft}>
+          <button style={styles.greenButton}>F10 Payment</button>
+          <button style={styles.redButton}>Void Order</button>
+        </div>
+
+        <div style={styles.actionRight}>
+          <button style={styles.blueButton}>Cash</button>
+          <button style={styles.blueButton}>Bank</button>
+          <button style={styles.blueButton}>Check</button>
+        </div>
+      </div>
+
+      {/* Side Actions */}
+      <div style={styles.sideActions}>
+        <button style={styles.sideButton}>F2 Discount</button>
+        <button style={styles.sideButton}>Comment</button>
+        <button style={styles.sideButton}>Customer</button>
+        <button style={styles.sideButton}>Cash Drawer</button>
+      </div>
+    </div>
   );
-}
+};
+
+// Enhanced Styles
+const styles = {
+  container: {
+    backgroundColor: "#2c2f33",
+    height: "100vh",
+    padding: "20px",
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    color: "white",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  header: {
+    marginBottom: "20px",
+  },
+  searchBar: {
+    width: "100%",
+    padding: "15px",
+    fontSize: "16px",
+    borderRadius: "8px",
+    backgroundColor: "#42454a",
+    color: "white",
+    border: "none",
+    outline: "none",
+    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.2)",
+  },
+  productContainer: {
+    flex: 1,
+    backgroundColor: "#36393f",
+    borderRadius: "8px",
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
+    overflow: "hidden",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    textAlign: "left",
+  },
+  tableHeader: {
+    padding: "15px",
+    backgroundColor: "#42454a",
+    fontWeight: "bold",
+    color: "white",
+    borderBottom: "1px solid #565b61",
+  },
+  tableCell: {
+    padding: "15px",
+    borderBottom: "1px solid #565b61",
+    color: "#d7d7d7",
+  },
+  totalsContainer: {
+    marginTop: "20px",
+    textAlign: "right",
+    color: "#d7d7d7",
+  },
+  totalsText: {
+    paddingRight: "20px",
+  },
+  actionSection: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "20px",
+  },
+  actionLeft: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  actionRight: {
+    display: "flex",
+    gap: "15px",
+  },
+  greenButton: {
+    padding: "15px 25px",
+    backgroundColor: "#4caf50",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "bold",
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
+    transition: "background-color 0.3s",
+  },
+  redButton: {
+    padding: "15px 25px",
+    backgroundColor: "#f44336",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "bold",
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
+    transition: "background-color 0.3s",
+  },
+  blueButton: {
+    padding: "15px 25px",
+    backgroundColor: "#2196f3",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "bold",
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
+    transition: "background-color 0.3s",
+  },
+  sideActions: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: "20px",
+  },
+  sideButton: {
+    flex: 1,
+    padding: "15px",
+    backgroundColor: "#565b61",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "bold",
+    margin: "0 10px",
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
+    transition: "background-color 0.3s",
+  },
+};
 
 export default Billing;

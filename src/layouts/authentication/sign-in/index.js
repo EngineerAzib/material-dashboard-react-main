@@ -32,40 +32,50 @@ function Basic() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await axios.post("https://localhost:7171/api/Auth/login", {
         email,
         password,
       });
-
+  
       console.log(response); // Log the full response for debugging
-
+  
       if (response.status === 200 && response.data.token) {
-        toast.success("Login successful!"); // Success toast
-
+        toast.success("Login successful!");
+  
         // Save tokens to localStorage
-        localStorage.setItem("accessToken", response.data.token); // Adjusted to `token` based on response
-        // localStorage.setItem("refreshToken", response.data.refreshToken); // If applicable
-      console.log("Saved Access Token:", localStorage.getItem("accessToken"));
-      if (response.data.token) {
         localStorage.setItem("accessToken", response.data.token);
-        navigate("/dashboard");
-      } 
-      else {
-        navigate("/signin");
-        toast.error("Something went wrong with authentication.");
-      }
-      
-       // Delay for better UX, allow toast to show
+  
+        // Ensure token is stored before navigating
+        const token = localStorage.getItem("accessToken");
+  
+        console.log("Saved Access Token:", token); // Log to verify token is saved
+  
+        if (token) {
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 500); // Small delay to ensure storage happens before navigation
+        } else {
+          toast.error("Failed to retrieve token. Please try again.");
+        }
+  
+      } else if (response.status === 400 || response.status === 401) {
+        toast.error("Incorrect email or password"); // Show specific error for invalid credentials
       } else {
-        toast.error("Incorrect email or password"); // Error toast for invalid login
+        toast.error("Something went wrong. Please try again.");
       }
     } catch (error) {
-      console.error(error); // Log error for debugging
-      toast.error("Something went wrong. Please try again."); // Error toast for failure
+      if (error.response && error.response.status === 401) {
+        toast.error("Incorrect email or password"); // Unauthorized
+      } else {
+        console.error(error); // Log error for debugging
+        toast.error("Something went wrong. Please try again."); // General error
+      }
     }
   };
+  
+  
 
   return (
     <>
