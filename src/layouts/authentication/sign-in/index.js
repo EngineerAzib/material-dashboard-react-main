@@ -39,23 +39,39 @@ function Basic() {
         password,
       });
   
-      console.log(response); // Debugging ke liye full response log karein
+      console.log(response); // Log the full response for debugging
   
       if (response.status === 200 && response.data.token) {
-        toast.success("Login successful!"); // Success toast
+        toast.success("Login successful!");
   
         // Save tokens to localStorage
         localStorage.setItem("accessToken", response.data.token);
-        
-        // Directly navigate to dashboard
-        navigate("/dashboard");
-        
+  
+        // Ensure token is stored before navigating
+        const token = localStorage.getItem("accessToken");
+  
+        console.log("Saved Access Token:", token); // Log to verify token is saved
+  
+        if (token) {
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 500); // Small delay to ensure storage happens before navigation
+        } else {
+          toast.error("Failed to retrieve token. Please try again.");
+        }
+  
+      } else if (response.status === 400 || response.status === 401) {
+        toast.error("Incorrect email or password"); // Show specific error for invalid credentials
       } else {
-        toast.error("Incorrect email or password"); // Invalid login ke liye error toast
+        toast.error("Something went wrong. Please try again.");
       }
     } catch (error) {
-      console.error(error); // Error log karein
-      toast.error("Something went wrong. Please try again."); // Failure ke liye error toast
+      if (error.response && error.response.status === 401) {
+        toast.error("Incorrect email or password"); // Unauthorized
+      } else {
+        console.error(error); // Log error for debugging
+        toast.error("Something went wrong. Please try again."); // General error
+      }
     }
   };
   

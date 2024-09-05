@@ -82,7 +82,6 @@ const routes = [
     route: "/DocumentType",
     component: isAuthenticated() ? <DocumentTypeManagement /> : <Navigate to="/authentication/sign-in" />,
   },
->>>>>>> Payment
   {
     type: "collapse",
     name: "Products",

@@ -25,7 +25,7 @@ const PaymentManagement = () => {
   const [paymentName, setPaymentName] = useState("");
   const [isEnable, setIsEnable] = useState(false);
   const [isQuickPayment, setIsQuickPayment] = useState(false);
-  const [printRecipt, setPrintRecipt] = useState(false);
+  const [printrecipt, setPrintRecipt] = useState(false);
   const [isMarkTransationAsPaid, setIsMarkTransationAsPaid] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -52,11 +52,11 @@ const PaymentManagement = () => {
       paymentName: item.name,
       isEnable: item.isEnable,
       isQuickPayment: item.isQuickPayment,
-      printRecipt: item.printRecipt,
+      printrecipt: item.printrecipt,
       isMarkTransationAsPaid: item.isMarkTransationAsPaid,
       action: (
         <>
-          <IconButton onClick={() => handleEditClick(item.id, item.name, item.isEnable, item.isQuickPayment, item.printRecipt, item.isMarkTransationAsPaid)}>
+          <IconButton onClick={() => handleEditClick(item.id, item.name, item.isEnable, item.isQuickPayment, item.printrecipt, item.isMarkTransationAsPaid)}>
             <EditIcon />
           </IconButton>
           <IconButton onClick={() => handleDeleteClick(item.id)}>
@@ -84,12 +84,12 @@ const PaymentManagement = () => {
         name: editingName,
         isEnable,
         isQuickPayment,
-        printRecipt,
+        printrecipt,
         isMarkTransationAsPaid
       });
       setRows((prevRows) =>
         prevRows.map((row) =>
-          row.id === editingId ? { ...row, paymentName: editingName, isEnable, isQuickPayment, printRecipt, isMarkTransationAsPaid } : row
+          row.id === editingId ? { ...row, paymentName: editingName, isEnable, isQuickPayment, printrecipt, isMarkTransationAsPaid } : row
         )
       );
       setEditingId(null);
@@ -120,7 +120,7 @@ const PaymentManagement = () => {
         name: paymentName,
         isEnable,
         isQuickPayment,
-        printRecipt,
+        printrecipt,
         isMarkTransationAsPaid
       });
       toast.success("Payment added successfully!");
@@ -179,7 +179,7 @@ const PaymentManagement = () => {
                     { Header: "Payment", accessor: "paymentName", align: "center" },
                     { Header: "Is Enabled", accessor: "isEnable", Cell: ({ value }) => <Toggle checked={value} onChange={() => {}} /> , align: "center" },
                     { Header: "Is Quick Payment", accessor: "isQuickPayment", Cell: ({ value }) => <Toggle checked={value} onChange={() => {}} /> , align: "center" },
-                    { Header: "Print Receipt", accessor: "printRecipt", Cell: ({ value }) => <Toggle checked={value} onChange={() => {}} /> , align: "center" },
+                    { Header: "Print Receipt", accessor: "printrecipt", Cell: ({ value }) => <Toggle checked={value} onChange={() => {}} /> , align: "center" },
                     { Header: "Mark Transaction as Paid", accessor: "isMarkTransationAsPaid", Cell: ({ value }) => <Toggle checked={value} onChange={() => {}} /> , align: "center" },
                     { Header: "Action", accessor: "action", align: "center" }
                   ],
@@ -206,7 +206,7 @@ const PaymentManagement = () => {
                     </div>
                     <div style={{ margin: '10px 0' }}>
                       <label>Print Receipt</label>
-                      <Toggle checked={printRecipt} onChange={() => setPrintRecipt(!printRecipt)} />
+                      <Toggle checked={printrecipt} onChange={() => setPrintRecipt(!printrecipt)} />
                     </div>
                     <div style={{ margin: '10px 0' }}>
                       <label>Mark Transaction as Paid</label>
@@ -241,7 +241,7 @@ const PaymentManagement = () => {
                     </div>
                     <div style={{ margin: '10px 0' }}>
                       <label>Print Receipt</label>
-                      <Toggle checked={printRecipt} onChange={() => setPrintRecipt(!printRecipt)} />
+                      <Toggle checked={printrecipt} onChange={() => setPrintRecipt(!printrecipt)} />
                     </div>
                     <div style={{ margin: '10px 0' }}>
                       <label>Mark Transaction as Paid</label>
