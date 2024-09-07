@@ -73,6 +73,41 @@ const Billing = () => {
     setProducts(updatedProducts);
   };
 
+  // Handle save operation
+  const handleSave = async () => {
+    try {
+      const userId = localStorage.getItem("userId"); // Get the logged-in user's ID
+  console.log(userId)
+      if (!userId) {
+        alert("User is not logged in.");
+        return;
+      }
+  
+      for (let product of products) {
+        const payload = {
+          BillingDate: new Date().toISOString(), // Ensure the date is in ISO format
+          InvoiceNo: null, // Invoice number will be auto-generated
+          Quantity: product.quantity,
+          UnitPrice: product.price,
+          TotalAmount: product.amount,
+          PaymentAmount: product.amount,
+          Status: product.amount === product.price * product.quantity ? "PAID" : "PENDING",
+          UserId: userId, // Use the retrieved user ID
+          ProductId: product.id,
+          PaymentId: 1, // Example PaymentId, adjust as needed
+        };
+  
+        console.log("Payload:", payload); // Debug log to check payload
+  
+        await axios.post("https://localhost:7171/api/Billing/AddBilling", payload);
+      }
+      alert("Billing information saved successfully!");
+    } catch (error) {
+      console.error("Error saving billing information:", error);
+      alert("Failed to save billing information.");
+    }
+  };
+  
   return (
     <div style={styles.container}>
       {/* Search Bar */}
@@ -141,6 +176,11 @@ const Billing = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Save Button */}
+      <button onClick={handleSave} style={styles.saveButton}>
+        Save
+      </button>
 
       {/* Totals Section */}
       <div style={styles.totalsContainer}>
@@ -219,25 +259,34 @@ const styles = {
   tableCell: {
     padding: "12px",
     borderBottom: "1px solid #565b61",
-    color: "#d7d7d7",
+    color: "white",
   },
   smallInputField: {
-    width: "70px", // Reduced width for smaller input boxes
-    padding: "6px",
+    width: "80px",
+    padding: "8px",
     borderRadius: "4px",
-    backgroundColor: "#565b61",
-    color: "white",
     border: "none",
-    textAlign: "center",
+    outline: "none",
+    backgroundColor: "#42454a",
+    color: "white",
+  },
+  saveButton: {
+    padding: "12px 24px",
+    backgroundColor: "#7289da",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "16px",
+    borderRadius: "6px",
+    border: "none",
+    cursor: "pointer",
+    alignSelf: "flex-end",
+    marginTop: "20px",
   },
   totalsContainer: {
     marginTop: "20px",
-    textAlign: "right",
-    color: "#d7d7d7",
   },
   totalsText: {
-    fontSize: "18px",
-    lineHeight: "1.5",
+    textAlign: "right",
   },
 };
 
