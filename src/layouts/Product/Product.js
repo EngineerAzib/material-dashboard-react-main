@@ -19,6 +19,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -26,55 +27,62 @@ const Product = () => {
     price: "",
     category: "",
     image: null,
+    barcode: "",
+    supplierId: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState({ add: false, edit: false });
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    fetchInitialData();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchInitialData = async () => {
     try {
-      const response = await axios.get("https://localhost:7171/GetProduct");
-      setProducts(formatProductData(response.data || []));
-      console.log(response);
+      const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
+        axios.get('https://localhost:7171/api/Supplier/GetSupplier'),
+        
+        axios.get('https://localhost:7171/GetCategory'),
+        axios.get('https://localhost:7171/GetProduct'),
+      ]);
+      console.log(suppliersResponse)
+      setSuppliers(suppliersResponse.data || []);
+      setCategories(categoriesResponse.data || []);
+      setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || []));
     } catch (error) {
-      toast.error("Failed to fetch product data.");
+      toast.error("Failed to fetch data.");
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get("https://localhost:7171/GetCategory");
-      setCategories(response.data || []);
-      
-    } catch (error) {
-      toast.error("Failed to fetch categories.");
-    }
+  const formatProductData = (products, suppliers) => {
+    return products.map((product) => {
+      const supplier = suppliers.find(supplier => supplier.id === product.supplierId);
+      return {
+        id: product.id,
+        name: product.name,
+        quantity: product.quantity,
+        price: product.price,
+        category: product.categoryName,
+        image: product.image.includes('/images/') ? `https://localhost:7171${product.image}` : product.image,
+        barcode: product.barCode || "N/A",
+        supplier: supplier ? supplier.supplierName : "N/A",
+        actions: (
+          <>
+            <IconButton onClick={() => handleEditClick(product)}>
+              <EditIcon />
+            </IconButton>
+            <IconButton onClick={() => handleDeleteProduct(product.id)}>
+              <DeleteIcon />
+            </IconButton>
+          </>
+        ),
+      };
+    });
   };
 
-  const formatProductData = (data) => {
-    return data.map((item) => ({
-      id: item.id,
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-      category: item.categoryName,
-      image: item.image.includes('/images/') ? `https://localhost:7171${item.image}` : item.image,
-
-      actions: (
-        <>
-          <IconButton onClick={() => handleEditClick(item)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton onClick={() => handleDeleteProduct(item.id)}>
-            <DeleteIcon />
-          </IconButton>
-        </>
-      ),
-    }));
+  const generateBarcode = () => {
+    const barcode = Math.floor(1000000 + Math.random() * 9000000).toString();
+    setNewProduct((prev) => ({ ...prev, barcode }));
   };
 
   const handleEditClick = (product) => {
@@ -83,8 +91,10 @@ const Product = () => {
       name: product.name,
       quantity: product.quantity,
       price: product.price,
-      category: product.categoryId, // Assuming categoryId is the category identifier
-      image:product.image.includes('https') ? `https://localhost:7171${product.image}` : product.image
+      category: product.categoryId,
+      barcode: product.barcode,
+      supplierId: product.supplierId,
+      image: product.image.includes('https') ? product.image : null,
     });
     setIsModalOpen((prev) => ({ ...prev, edit: true }));
   };
@@ -96,12 +106,14 @@ const Product = () => {
     formData.append("ProName", newProduct.name);
     formData.append("ProQuantiy", newProduct.quantity);
     formData.append("ProPrice", newProduct.price);
-    formData.append("CatId", newProduct.category); // Assuming newProduct.category is the category ID
+    formData.append("CatId", newProduct.category);
+    formData.append("Barcode", newProduct.barcode);
+    formData.append("SupplierId", newProduct.supplierId);
     if (newProduct.image) formData.append("imageFile", newProduct.image);
 
     try {
       await axios.put("https://localhost:7171/UpdateProduct", formData);
-      fetchProducts();
+      fetchInitialData();
       closeModal();
       toast.success("Product updated successfully!");
     } catch (error) {
@@ -115,12 +127,14 @@ const Product = () => {
     formData.append("ProName", newProduct.name);
     formData.append("ProQuantiy", newProduct.quantity);
     formData.append("ProPrice", newProduct.price);
-    formData.append("CatId", newProduct.category); // Assuming newProduct.category is the category ID
+    formData.append("CatId", newProduct.category);
+    formData.append("Barcode", newProduct.barcode);
+    formData.append("SupplierId", newProduct.supplierId);
     if (newProduct.image) formData.append("imageFile", newProduct.image);
-  
+
     try {
       await axios.post('https://localhost:7171/AddProduct', formData);
-      fetchProducts();
+      fetchInitialData();
       closeModal();
       toast.success("Product added successfully!");
     } catch (error) {
@@ -158,6 +172,8 @@ const Product = () => {
       quantity: "",
       price: "",
       category: "",
+      barcode: "",
+      supplierId: "",
       image: null,
     });
   };
@@ -246,168 +262,111 @@ const Product = () => {
           </button>
         </MDBox>
         <Card>
-          <MDBox p={3}>
-            <DataTable
-              table={{
-                columns: [
-                  { Header: "Name", accessor: "name" },
-                  { Header: "Quantity", accessor: "quantity" },
-                  { Header: "Price", accessor: "price" },
-                  { Header: "Category", accessor: "category" },
-                  {
-                    Header: "Image",
-                    accessor: "image",
-                    Cell: ({ value }) => <img src={value} alt="Product" style={{ width: "50px", borderRadius: "5px" }} />,
-                  },
-                  { Header: "Actions", accessor: "actions" },
-                ],
-                rows: filteredProducts,
+          <MDBox pt={3}> <DataTable table={{ columns: [ { Header: "Name", accessor: "name", width: "30%" }, { Header: "Category", accessor: "category", width: "20%" }, { Header: "Price", accessor: "price", width: "10%" }, { Header: "Quantity", accessor: "quantity", width: "10%" }, { Header: "Supplier", accessor: "supplier", width: "10%" }, { Header: "Barcode", accessor: "barcode", width: "10%" }, { Header: "Actions", accessor: "actions", width: "10%" }, ],                 rows: filteredProducts,
               }}
+              entriesPerPage={false}
+              canSearch={false}
             />
           </MDBox>
         </Card>
-
-        {/* Add Product Modal */}
-        {isModalOpen.add && (
-          <div style={modalStyles.overlay}>
-            <div style={modalStyles.modal}>
-              <div style={modalStyles.header}>
-                <MDTypography variant="h5">Add New Product</MDTypography>
-                <button style={modalStyles.closeButton} onClick={closeModal}>
-                  &times;
-                </button>
-              </div>
-              <form onSubmit={handleAddProduct}>
-                <input
-                  style={modalStyles.input}
-                  type="text"
-                  name="name"
-                  placeholder="Product Name"
-                  value={newProduct.name}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  style={modalStyles.input}
-                  type="number"
-                  name="quantity"
-                  placeholder="Quantity"
-                  value={newProduct.quantity}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  style={modalStyles.input}
-                  type="number"
-                  name="price"
-                  placeholder="Price"
-                  value={newProduct.price}
-                  onChange={handleInputChange}
-                  required
-                />
-                <select
-                  style={modalStyles.input}
-                  name="category"
-                  value={newProduct.category}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.catName}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  style={modalStyles.input}
-                  type="file"
-                  name="image"
-                  onChange={handleInputChange}
-                />
-                <button type="submit" style={modalStyles.submitButton}>
-                  Add Product
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Product Modal */}
-        {isModalOpen.edit && editingProduct && (
-          <div style={modalStyles.overlay}>
-            <div style={modalStyles.modal}>
-              <div style={modalStyles.header}>
-                <MDTypography variant="h5">Edit Product</MDTypography>
-                <button style={modalStyles.closeButton} onClick={closeModal}>
-                  &times;
-                </button>
-              </div>
-              <form onSubmit={handleEditProduct}>
-                <input
-                  style={modalStyles.input}
-                  type="text"
-                  name="name"
-                  placeholder="Product Name"
-                  value={newProduct.name}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  style={modalStyles.input}
-                  type="number"
-                  name="quantity"
-                  placeholder="Quantity"
-                  value={newProduct.quantity}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  style={modalStyles.input}
-                  type="number"
-                  name="price"
-                  placeholder="Price"
-                  value={newProduct.price}
-                  onChange={handleInputChange}
-                  required
-                />
-                <select
-                  style={modalStyles.input}
-                  name="category"
-                  value={newProduct.category}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.catName}
-                    </option>
-                  ))}
-                </select>
-                {editingProduct.image && (
-  <img
-    src={newProduct.image} // Ensure you're using newProduct.image here
-    alt="Product"
-    style={{ width: "100px", marginBottom: "15px", borderRadius: "5px" }}
-  />
-)}
-
-                <input
-                  style={modalStyles.input}
-                  type="file"
-                  name="image"
-                  onChange={handleInputChange}
-                />
-                <button type="submit" style={modalStyles.submitButton}>
-                  Save Changes
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
       </MDBox>
       <Footer />
+
+      {isModalOpen.add || isModalOpen.edit ? (
+        <div style={modalStyles.overlay}>
+          <div style={modalStyles.modal}>
+            <div style={modalStyles.header}>
+              <h2>{isModalOpen.add ? "Add New Product" : "Edit Product"}</h2>
+              <button style={modalStyles.closeButton} onClick={closeModal}>
+                &times;
+              </button>
+            </div>
+            <form onSubmit={isModalOpen.add ? handleAddProduct : handleEditProduct}>
+              <input
+                type="text"
+                name="name"
+                placeholder="Product Name"
+                style={modalStyles.input}
+                value={newProduct.name}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="number"
+                name="quantity"
+                placeholder="Quantity"
+                style={modalStyles.input}
+                value={newProduct.quantity}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="number"
+                name="price"
+                placeholder="Price"
+                style={modalStyles.input}
+                value={newProduct.price}
+                onChange={handleInputChange}
+                required
+              />
+              <select
+                name="category"
+                style={modalStyles.input}
+                value={newProduct.category}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="" disabled>
+                  Select Category
+                </option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.catName}
+                  </option>
+                ))}
+              </select>
+              <select
+                name="supplierId"
+                style={modalStyles.input}
+                value={newProduct.supplierId}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="" disabled>
+                  Select Supplier
+                </option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.supplierName}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="barcode"
+                placeholder="Barcode"
+                style={modalStyles.input}
+                value={newProduct.barCode}
+                onChange={handleInputChange}
+              />
+              <button type="button" onClick={generateBarcode} style={modalStyles.input}>
+                Generate Barcode
+              </button>
+              <input
+                type="file"
+                name="image"
+                style={modalStyles.input}
+                onChange={handleInputChange}
+                accept="image/*"
+              />
+              <button type="submit" style={modalStyles.submitButton}>
+                {isModalOpen.add ? "Add Product" : "Update Product"}
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
       <ToastContainer />
     </DashboardLayout>
   );
