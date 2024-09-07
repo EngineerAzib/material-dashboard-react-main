@@ -7,8 +7,8 @@ import StaffTable from "layouts/Staff/StaffTable.js";
 import Product from "layouts/Product/Product";
 import Supplier from "layouts/supplier/supplier";
 import Billing from "layouts/billing";
-// import PaymentManagement from "layouts/Payment/payment";
-// import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
+import PaymentManagement from "layouts/Payment/payment";
+import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
@@ -19,8 +19,8 @@ import DinnerDiningIcon from '@mui/icons-material/DinnerDining';
 import GroupIcon from '@mui/icons-material/Group';
 import StoreIcon from '@mui/icons-material/Store';
 import SupplierIcon from '@mui/icons-material/Business';
-// import PaymentIcon from '@mui/icons-material/Payment';
-// import DescriptionIcon from '@mui/icons-material/Description';
+import PaymentIcon from '@mui/icons-material/Payment';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 import Icon from "@mui/material/Icon";
 import { Navigate } from "react-router-dom";
@@ -30,7 +30,6 @@ const isAuthenticated = () => !!localStorage.getItem('accessToken');
 
 // Log the result to the console
 console.log('Is user authenticated?', isAuthenticated());
-
 
 
 const routes = [
@@ -65,23 +64,24 @@ const routes = [
     icon: <GroupIcon fontSize="small" />,
     route: "/staff",
     component: isAuthenticated() ? <StaffTable /> : <Navigate to="/authentication/sign-in" />,
+
   },
-  // {
-  //   type: "collapse",
-  //   name: "Payment",
-  //   key: "Payment",
-  //   icon: <PaymentIcon fontSize="small" />,
-  //   route: "/Payment",
-  //   component: isAuthenticated() ? <PaymentManagement /> : <Navigate to="/authentication/sign-in" />,
-  // },
-  // {
-  //   type: "collapse",
-  //   name: "DocumentType",
-  //   key: "DocumentType",
-  //   icon: <DescriptionIcon fontSize="small" />,
-  //   route: "/DocumentType",
-  //   component: isAuthenticated() ? <DocumentTypeManagement /> : <Navigate to="/authentication/sign-in" />,
-  // },
+  {
+    type: "collapse",
+    name: "Payment",
+    key: "Payment",
+    icon: <PaymentIcon fontSize="small" />,
+    route: "/Payment",
+    component: isAuthenticated() ? <PaymentManagement /> : <Navigate to="/authentication/sign-in" />,
+  },
+  {
+    type: "collapse",
+    name: "DocumentType",
+    key: "DocumentType",
+    icon: <DescriptionIcon fontSize="small" />,
+    route: "/DocumentType",
+    component: isAuthenticated() ? <DocumentTypeManagement /> : <Navigate to="/authentication/sign-in" />,
+  },
   {
     type: "collapse",
     name: "Products",

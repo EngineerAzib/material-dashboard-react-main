@@ -32,7 +32,6 @@ import PageLayout from "examples/LayoutContainers/PageLayout";
 function CoverLayout({ coverHeight, image, children }) {
   return (
     <PageLayout>
-    
       <MDBox
         width="calc(100% - 2rem)"
         minHeight={coverHeight}

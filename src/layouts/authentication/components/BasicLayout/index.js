@@ -31,7 +31,6 @@ import PageLayout from "examples/LayoutContainers/PageLayout";
 function BasicLayout({ image, children }) {
   return (
     <PageLayout>
-      
       <MDBox
         position="absolute"
         width="100%"

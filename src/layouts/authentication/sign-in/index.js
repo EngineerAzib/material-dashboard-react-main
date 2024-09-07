@@ -46,6 +46,7 @@ function Basic() {
   
         // Save tokens to localStorage
         localStorage.setItem("accessToken", response.data.token);
+
       localStorage.setItem("userId", response.data.userId);
 
       // Ensure token is stored before navigating
@@ -54,7 +55,6 @@ function Basic() {
 
       console.log("Saved Access Token:", token); // Log to verify token is saved
       console.log("Saved User ID:", userId); // Log to verify userId is saved
-
   
         if (token) {
           setTimeout(() => {
