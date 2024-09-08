@@ -77,36 +77,37 @@ const Billing = () => {
   const handleSave = async () => {
     try {
       const userId = localStorage.getItem("userId"); // Get the logged-in user's ID
-  console.log(userId)
+  
       if (!userId) {
         alert("User is not logged in.");
         return;
       }
   
-      for (let product of products) {
-        const payload = {
-          BillingDate: new Date().toISOString(), // Ensure the date is in ISO format
-          InvoiceNo: null, // Invoice number will be auto-generated
-          Quantity: product.quantity,
-          UnitPrice: product.price,
-          TotalAmount: product.amount,
-          PaymentAmount: product.amount,
-          Status: product.amount === product.price * product.quantity ? "PAID" : "PENDING",
-          UserId: userId, // Use the retrieved user ID
-          ProductId: product.id,
-          PaymentId: 1, // Example PaymentId, adjust as needed
-        };
+      // Prepare the payload with all products
+      const payload = products.map(product => ({
+        BillingDate: new Date().toISOString(),
+        Quantity: product.quantity,
+        UnitPrice: product.price,
+        TotalAmount: product.amount,
+        PaymentAmount: product.amount,
+        Status: product.amount === product.price * product.quantity ? "PAID" : "PENDING",
+        UserId: userId,
+        ProductId: product.id,
+        PaymentId: 1, // Adjust as needed
+      }));
   
-        console.log("Payload:", payload); // Debug log to check payload
+      console.log("Payload:", payload); // Debug log to check payload
   
-        await axios.post("https://localhost:7171/api/Billing/AddBilling", payload);
-      }
+      // Send all products in a single request
+      await axios.post("https://localhost:7171/api/Billing/AddBilling", payload);
+  
       alert("Billing information saved successfully!");
     } catch (error) {
       console.error("Error saving billing information:", error);
       alert("Failed to save billing information.");
     }
   };
+  
   
   return (
     <div style={styles.container}>
