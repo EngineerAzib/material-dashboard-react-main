@@ -4,8 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
 
-import axios from "axios";
-import { getDailyRevenue ,getWeeklyRevenue} from 'Services/revenueService'; // 
+import { getDailyRevenue ,getWeeklyRevenue,getYearlyRevenue} from 'Services/revenueService'; // 
 const Billing = () => {
   const [products, setProducts] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -171,7 +170,9 @@ const handleQuantityChange = (index, value) => {
       await axios.post("https://localhost:7171/api/Billing/AddBilling", payload);
   
       toast.success("Billing information saved successfully!");
-  
+      await getYearlyRevenue();
+      await getDailyRevenue();
+      await getWeeklyRevenue();
       // Close the modal
       setModalOpen(false);
   
