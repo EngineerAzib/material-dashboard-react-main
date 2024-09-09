@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 
+import axios from "axios";
+import { getDailyRevenue ,getWeeklyRevenue} from 'Services/revenueService'; // 
 const Billing = () => {
   const [products, setProducts] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -102,6 +103,8 @@ const Billing = () => {
       await axios.post("https://localhost:7171/api/Billing/AddBilling", payload);
   
       alert("Billing information saved successfully!");
+      await getDailyRevenue();
+      await getWeeklyRevenue();
     } catch (error) {
       console.error("Error saving billing information:", error);
       alert("Failed to save billing information.");
