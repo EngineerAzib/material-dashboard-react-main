@@ -1,8 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
 
+import axios from "axios";
+import { getDailyRevenue ,getWeeklyRevenue} from 'Services/revenueService'; // 
 const Billing = () => {
   const [products, setProducts] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -149,10 +152,6 @@ const handleQuantityChange = (index, value) => {
   
     try {
       const userId = localStorage.getItem("userId");
-      if (!userId) {
-        toast.error("User is not logged in.");
-        return;
-      }
   
       const payload = products.flatMap(product => 
         Object.keys(selectedPaymentMethods).map(methodId => ({
@@ -183,6 +182,7 @@ const handleQuantityChange = (index, value) => {
       setTotalAmount(0);
       setEditableTotalAmount(0);
   
+
     } catch (error) {
       toast.error("Failed to save billing information.");
     }
