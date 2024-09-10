@@ -9,6 +9,7 @@ import Supplier from "layouts/supplier/supplier";
 import Billing from "layouts/billing";
 import PaymentManagement from "layouts/Payment/payment";
 import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
+import Expense from "layouts/expense/expense";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
@@ -81,6 +82,14 @@ const routes = [
     icon: <DescriptionIcon fontSize="small" />,
     route: "/DocumentType",
     component: isAuthenticated() ? <DocumentTypeManagement /> : <Navigate to="/authentication/sign-in" />,
+  },
+  {
+    type: "collapse",
+    name: "Expense",
+    key: "expense",
+    icon: <DescriptionIcon fontSize="small" />,
+    route: "/Expense",
+    component: isAuthenticated() ? <Expense /> : <Navigate to="/authentication/sign-in" />,
   },
   {
     type: "collapse",
