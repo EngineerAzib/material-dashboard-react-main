@@ -26,9 +26,10 @@ const Product = () => {
     quantity: "",
     price: "",
     category: "",
-    image: null,
+    // image: null,
     barCode: "",
     supplierId: "",
+    isLowStockWarring: "", // New field for low stock warning
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState({ add: false, edit: false });
@@ -41,11 +42,9 @@ const Product = () => {
     try {
       const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
         axios.get('https://localhost:7171/api/Supplier/GetSupplier'),
-        
         axios.get('https://localhost:7171/GetCategory'),
         axios.get('https://localhost:7171/GetProduct'),
       ]);
-      console.log(suppliersResponse)
       setSuppliers(suppliersResponse.data || []);
       setCategories(categoriesResponse.data || []);
       setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || []));
@@ -63,9 +62,10 @@ const Product = () => {
         quantity: product.quantity,
         price: product.price,
         category: product.categoryName,
-        image: product.image.includes('/images/') ? `https://localhost:7171${product.image}` : product.image,
+        // image: product.image.includes('/images/') ? `https://localhost:7171${product.image}` : product.image,
         barcode: product.barCode || "N/A",
         supplier: supplier ? supplier.supplierName : "N/A",
+        isLowStockWarring: product.isLowStockWarring || "N/A",
         actions: (
           <>
             <IconButton onClick={() => handleEditClick(product)}>
@@ -94,7 +94,8 @@ const Product = () => {
       category: product.categoryId,
       barCode: product.barCode,
       supplierId: product.supplierId,
-      image: product.image.includes('https') ? product.image : null,
+      // image: product.image.includes('https') ? product.image : null,
+      isLowStockWarring: product.isLowStockWarring || "", // Populate the field with existing data
     });
     setIsModalOpen((prev) => ({ ...prev, edit: true }));
   };
@@ -109,7 +110,8 @@ const Product = () => {
     formData.append("CatId", newProduct.category);
     formData.append("Barcode", newProduct.barCode);
     formData.append("SupplierId", newProduct.supplierId);
-    if (newProduct.image) formData.append("imageFile", newProduct.image);
+    formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
+    // if (newProduct.image) formData.append("imageFile", newProduct.image);
 
     try {
       await axios.put("https://localhost:7171/UpdateProduct", formData);
@@ -130,7 +132,8 @@ const Product = () => {
     formData.append("CatId", newProduct.category);
     formData.append("Barcode", newProduct.barCode);
     formData.append("SupplierId", newProduct.supplierId);
-    if (newProduct.image) formData.append("imageFile", newProduct.image);
+    formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
+    // if (newProduct.image) formData.append("imageFile", newProduct.image);
 
     try {
       await axios.post('https://localhost:7171/AddProduct', formData);
@@ -156,7 +159,7 @@ const Product = () => {
     const { name, value, files } = e.target;
     setNewProduct((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value,
+      [name]: name === "isLowStockWarring" ? parseInt(value, 10) : files ? files[0] : value,
     }));
   };
 
@@ -174,7 +177,8 @@ const Product = () => {
       category: "",
       barCode: "",
       supplierId: "",
-      image: null,
+      // image: null,
+      isLowStockWarring: "", // Reset on close
     });
   };
 
@@ -258,142 +262,151 @@ const Product = () => {
       marginRight: '10px',
     },
   };
-  
-  
-  
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox py={3}>
-        <MDBox display="flex" justifyContent="space-between" alignItems="center">
-          <MDTypography variant="h4" gutterBottom>
-            Product Management
-          </MDTypography>
-          <MDInput
-            type="text"
-            placeholder="Search..."
-            onChange={handleSearch}
-            value={searchTerm}
-          />
-          <button style={modalStyles.button} onClick={() => setIsModalOpen((prev) => ({ ...prev, add: true }))}>
-            Add New Product
-          </button>
-        </MDBox>
-        <Card>
-          <MDBox pt={3}> <DataTable table={{ columns: [ { Header: "Name", accessor: "name", width: "30%" }, { Header: "Category", accessor: "category", width: "20%" }, { Header: "Price", accessor: "price", width: "10%" }, { Header: "Quantity", accessor: "quantity", width: "10%" }, { Header: "Supplier", accessor: "supplier", width: "10%" }, { Header: "Barcode", accessor: "barcode", width: "10%" }, { Header: "Actions", accessor: "actions", width: "10%" }, ],                 rows: filteredProducts,
-              }}
-              entriesPerPage={false}
-              canSearch={false}
-            />
-          </MDBox>
-        </Card>
+      <MDBox pt={6} pb={3}>
+        <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <Card>
+              <MDBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                <MDTypography variant="h6">Product List</MDTypography>
+                <MDInput
+                  label="Search"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  variant="outlined"
+                />
+                <IconButton onClick={() => setIsModalOpen((prev) => ({ ...prev, add: true }))}>
+                  <SaveIcon />
+                </IconButton>
+              </MDBox>
+              <DataTable
+  table={{
+    columns: [
+      { Header: "Name", accessor: "name" },
+      { Header: "Quantity", accessor: "quantity" },
+      { Header: "Price", accessor: "price" },
+      { Header: "Category", accessor: "category" },
+      { Header: "Barcode", accessor: "barcode" },
+      { Header: "Supplier", accessor: "supplier" },
+      { Header: "Low Stock Warning", accessor: "isLowStockWarring" }, // New column for low stock warning
+      { Header: "Actions", accessor: "actions" },
+    ],
+    rows: filteredProducts, // Use the filtered product data
+  }}
+/>
+
+            </Card>
+          </Grid>
+        </Grid>
       </MDBox>
       <Footer />
-
-      {isModalOpen.add || isModalOpen.edit ? (
-  <div style={modalStyles.overlay}>
-    <div style={modalStyles.modal}>
-      <div style={modalStyles.header}>
-        <h2>{isModalOpen.add ? "Add New Product" : "Edit Product"}</h2>
-        <button style={modalStyles.closeButton} onClick={closeModal}>
-          &times;
-        </button>
-      </div>
-      <form onSubmit={isModalOpen.add ? handleAddProduct : handleEditProduct}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Product Name"
-          style={modalStyles.input}
-          value={newProduct.name}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="number"
-          name="quantity"
-          placeholder="Quantity"
-          style={modalStyles.input}
-          value={newProduct.quantity}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          style={modalStyles.input}
-          value={newProduct.price}
-          onChange={handleInputChange}
-          required
-        />
-        <select
-          name="category"
-          style={modalStyles.input}
-          value={newProduct.category}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="" disabled>
-            Select Category
-          </option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.catName}
-            </option>
-          ))}
-        </select>
-        <select
-          name="supplierId"
-          style={modalStyles.input}
-          value={newProduct.supplierId}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="" disabled>
-            Select Supplier
-          </option>
-          {suppliers.map((supplier) => (
-            <option key={supplier.id} value={supplier.id}>
-              {supplier.supplierName}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          name="barCode"
-          placeholder="Barcode"
-          style={modalStyles.input}
-          value={newProduct.barCode}
-          onChange={handleInputChange}
-        />
-        <button type="button" onClick={generateBarcode} style={modalStyles.button}>
-          Generate Barcode
-        </button>
-        <input
-          type="file"
-          name="image"
-          style={modalStyles.input}
-          onChange={handleInputChange}
-          accept="image/*"
-        />
-        <div style={modalStyles.footer}>
-          <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
-            Cancel
-          </button>
-          <button type="submit" style={modalStyles.submitButton}>
-            {isModalOpen.add ? "Add Product" : "Update Product"}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-) : null}
-
-
-
       <ToastContainer />
+      {/* Add and Edit Modal */}
+      {(isModalOpen.add || isModalOpen.edit) && (
+        <div style={modalStyles.overlay}>
+          <div style={modalStyles.modal}>
+            <div style={modalStyles.header}>
+              <h3>{editingProduct ? "Edit Product" : "Add Product"}</h3>
+              <button style={modalStyles.closeButton} onClick={closeModal}>×</button>
+            </div>
+            <form onSubmit={editingProduct ? handleEditProduct : handleAddProduct}>
+              <input
+                type="text"
+                name="name"
+                placeholder="Product Name"
+                style={modalStyles.input}
+                value={newProduct.name}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="number"
+                name="quantity"
+                placeholder="Quantity"
+                style={modalStyles.input}
+                value={newProduct.quantity}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="number"
+                name="price"
+                placeholder="Price"
+                style={modalStyles.input}
+                value={newProduct.price}
+                onChange={handleInputChange}
+                required
+              />
+              <select
+                name="category"
+                style={modalStyles.input}
+                value={newProduct.category}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.catName}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                name="isLowStockWarring"
+                placeholder="Low Stock Warning (Quantity)"
+                style={modalStyles.input}
+                value={newProduct.isLowStockWarring}
+                onChange={handleInputChange}
+                required
+              />
+              {/* <input
+                type="file"
+                name="image"
+                accept="image/*"
+                style={modalStyles.input}
+                onChange={handleInputChange}
+              /> */}
+              <input
+                type="text"
+                name="barCode"
+                placeholder="Barcode"
+                style={modalStyles.input}
+                value={newProduct.barCode}
+                onChange={handleInputChange}
+              />
+              <button type="button" onClick={generateBarcode} style={modalStyles.button}>
+                Generate Barcode
+              </button>
+              <select
+                name="supplierId"
+                style={modalStyles.input}
+                value={newProduct.supplierId}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Supplier</option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.supplierName}
+                  </option>
+                ))}
+              </select>
+              <div style={modalStyles.footer}>
+                <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
+                  Cancel
+                </button>
+                <button type="submit" style={modalStyles.submitButton}>
+                  {editingProduct ? "Update" : "Add"} Product
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
