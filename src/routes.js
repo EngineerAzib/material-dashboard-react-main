@@ -9,6 +9,7 @@ import Supplier from "layouts/supplier/supplier";
 import Billing from "layouts/billing";
 import PaymentManagement from "layouts/Payment/payment";
 import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
+import PurchaseProduct from "layouts/PurchasProduct/PurchaseProduct";
 import Expense from "layouts/expense/expense";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -114,6 +115,14 @@ const routes = [
     icon: <Icon fontSize="small">receipt_long</Icon>,
     route: "/billing",
     component: isAuthenticated() ? <Billing /> : <Navigate to="/authentication/sign-in" />,
+  },
+  {
+    type: "collapse",
+    name: "PurchaseProduct",
+    key: "PurchaseProduct",
+    icon: <Icon fontSize="small">shopping_bag</Icon>,
+    route: "/PurchaseProduct",
+    component: isAuthenticated() ? <PurchaseProduct /> : <Navigate to="/authentication/sign-in" />,
   },
   {
     type: "collapse",
