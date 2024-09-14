@@ -22,7 +22,7 @@ import themeRTL from "assets/theme/theme-rtl";
 // Material Dashboard 2 React Dark Mode themes
 import themeDark from "assets/theme-dark";
 import themeDarkRTL from "assets/theme-dark/theme-rtl";
-
+import LowStockNotification from "NotificationComponent/LowStockNotification";
 // RTL plugins
 import rtlPlugin from "stylis-plugin-rtl";
 import { CacheProvider } from "@emotion/react";
@@ -197,6 +197,7 @@ export default function App() {
         {getRoutes(routes)}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
+      <LowStockNotification />
     </ThemeProvider>
   );
 }
