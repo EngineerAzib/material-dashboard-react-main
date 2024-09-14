@@ -149,7 +149,23 @@ const handleQuantityChange = (index, value) => {
       return;
     }
   
+    // Validate product quantities
     try {
+      // Fetch available quantities from the backend
+      const response = await axios.get("https://localhost:7171/api/Billing/GetAvailableQuantities");
+      const availableQuantities = response.data;
+  
+      // Check if any product quantity exceeds available stock
+      const invalidProducts = products.filter(product => 
+        (availableQuantities[product.id] || 0) < product.quantity
+      );
+  
+      if (invalidProducts.length > 0) {
+        toast.error("Some products have insufficient quantity. Please adjust the quantities.");
+        return;
+      }
+  
+      // If validation passes, prepare and send the billing data
       const userId = localStorage.getItem("userId");
   
       const payload = products.flatMap(product => 
@@ -166,28 +182,26 @@ const handleQuantityChange = (index, value) => {
         }))
       );
   
-  
       await axios.post("https://localhost:7171/api/Billing/AddBilling", payload);
   
       toast.success("Billing information saved successfully!");
       await getYearlyRevenue();
       await getDailyRevenue();
       await getWeeklyRevenue();
-      // Close the modal
+      
+      // Close the modal and reset form
       setModalOpen(false);
-  
-      // Clear the product list to reset the billing table
       setProducts([]);
       setSelectedPaymentMethods({});
       setCustomAmounts({});
       setTotalAmount(0);
       setEditableTotalAmount(0);
   
-
     } catch (error) {
       toast.error("Failed to save billing information.");
     }
   };
+  
   
   
   return (
