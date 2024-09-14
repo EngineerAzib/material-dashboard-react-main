@@ -19,7 +19,6 @@ import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
 
 import BasicLayout from "layouts/authentication/components/BasicLayout";
-
 import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 
 function Basic() {
@@ -28,12 +27,15 @@ function Basic() {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
+  // Toggle the 'Remember Me' switch
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
+  // Handle the login form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     try {
+      // Send login request to the backend
       const response = await axios.post("https://localhost:7171/api/Auth/login", {
         email,
         password,
@@ -42,49 +44,54 @@ function Basic() {
       console.log(response); // Log the full response for debugging
   
       if (response.status === 200 && response.data.token) {
+        // Show success message
         toast.success("Login successful!");
   
-        // Save tokens to localStorage
+        // Save token and userId to localStorage
         localStorage.setItem("accessToken", response.data.token);
-
-      localStorage.setItem("userId", response.data.userId);
-
-      // Ensure token is stored before navigating
-      const token = localStorage.getItem("accessToken");
-      const userId = localStorage.getItem("userId");
-
-      console.log("Saved Access Token:", token); // Log to verify token is saved
-      console.log("Saved User ID:", userId); // Log to verify userId is saved
+        localStorage.setItem("userId", response.data.userId);
   
+        // Check if the token is stored successfully
+        const token = localStorage.getItem("accessToken");
+        const userId = localStorage.getItem("userId");
+
+        console.log("Saved Access Token:", token);
+        console.log("Saved User ID:", userId);
+  
+        // If token exists, navigate to the dashboard after a short delay
         if (token) {
           setTimeout(() => {
             navigate("/dashboard");
-          }, 500); // Small delay to ensure storage happens before navigation
+            window.location.reload();
+          }, 500); // Delay added to ensure token is saved before navigation
         } else {
+          // Show error if token isn't saved
           toast.error("Failed to retrieve token. Please try again.");
         }
   
       } else if (response.status === 400 || response.status === 401) {
-        toast.error("Incorrect email or password"); // Show specific error for invalid credentials
+        // Handle incorrect email or password
+        toast.error("Incorrect email or password");
       } else {
+        // Handle other errors
         toast.error("Something went wrong. Please try again.");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        toast.error("Incorrect email or password"); // Unauthorized
+        // Unauthorized (incorrect credentials)
+        toast.error("Incorrect email or password");
       } else {
-        console.error(error); // Log error for debugging
-        toast.error("Something went wrong. Please try again."); // General error
+        console.error(error); // Log the error for debugging
+        toast.error("Something went wrong. Please try again.");
       }
     }
   };
-  
-  
 
   return (
     <>
       <BasicLayout image={bgImage}>
         <Card>
+          {/* Header Section */}
           <MDBox
             variant="gradient"
             bgColor="info"
@@ -100,6 +107,7 @@ function Basic() {
               Sign in
             </MDTypography>
             <Grid container spacing={3} justifyContent="center" sx={{ mt: 1, mb: 2 }}>
+              {/* Social Icons */}
               <Grid item xs={2}>
                 <MDTypography component={MuiLink} href="#" variant="body1" color="white">
                   <FacebookIcon color="inherit" />
@@ -117,8 +125,11 @@ function Basic() {
               </Grid>
             </Grid>
           </MDBox>
+
+          {/* Form Section */}
           <MDBox pt={4} pb={3} px={3}>
             <MDBox component="form" role="form" onSubmit={handleSubmit}>
+              {/* Email Input */}
               <MDBox mb={2}>
                 <MDInput
                   type="email"
@@ -128,6 +139,7 @@ function Basic() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </MDBox>
+              {/* Password Input */}
               <MDBox mb={2}>
                 <MDInput
                   type="password"
@@ -137,6 +149,7 @@ function Basic() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </MDBox>
+              {/* Remember Me Switch */}
               <MDBox display="flex" alignItems="center" ml={-1}>
                 <Switch checked={rememberMe} onChange={handleSetRememberMe} />
                 <MDTypography
@@ -149,11 +162,13 @@ function Basic() {
                   &nbsp;&nbsp;Remember me
                 </MDTypography>
               </MDBox>
+              {/* Sign In Button */}
               <MDBox mt={4} mb={1}>
                 <MDButton variant="gradient" color="info" fullWidth type="submit">
                   Sign in
                 </MDButton>
               </MDBox>
+              {/* Sign Up Link */}
               <MDBox mt={3} mb={1} textAlign="center">
                 <MDTypography variant="button" color="text">
                   Don&apos;t have an account?{" "}
@@ -174,7 +189,7 @@ function Basic() {
         </Card>
       </BasicLayout>
 
-      {/* Add ToastContainer for toast notifications */}
+      {/* Toast Notifications */}
       <ToastContainer />
     </>
   );
