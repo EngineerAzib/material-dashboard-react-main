@@ -13,16 +13,79 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+// Modal Component for Add/Edit Expense
+const ExpenseModal = ({ isOpen, onClose, onSubmit, expenseData, setExpenseData, title }) => {
+  if (!isOpen) return null;
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setExpenseData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <div style={modalOverlayStyle}>
+      <div style={modalStyle}>
+        <h2>{title}</h2>
+        <form onSubmit={onSubmit}>
+          <MDInput
+            type="text"
+            name="name"
+            placeholder="Expense Name"
+            value={expenseData.name || ""}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <MDInput
+            type="number"
+            name="amount"
+            placeholder="Amount"
+            value={expenseData.amount || ""}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <MDInput
+            type="date"
+            name="startDate"
+            placeholder="Start Date"
+            value={expenseData.startDate || ""}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <MDInput
+            type="date"
+            name="endDate"
+            placeholder="End Date"
+            value={expenseData.endDate || ""}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <div style={buttonGroupStyle}>
+            <button type="submit" style={saveButtonStyle}>
+              {title === "Edit Expense" ? "Save" : "Add"}
+            </button>
+            <button type="button" onClick={onClose} style={cancelButtonStyle}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Main Expense Component
 const Expense = () => {
   const [rows, setRows] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editingName, setEditingName] = useState("");
-  const [editingAmount, setEditingAmount] = useState(0);
-  const [newExpenseName, setNewExpenseName] = useState("");
-  const [newExpenseAmount, setNewExpenseAmount] = useState(0);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [newExpense, setNewExpense] = useState({
+    name: "",
+    amount: 0,
+    startDate: "",
+    endDate: "",
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -38,7 +101,7 @@ const Expense = () => {
       setRows(formatRows(fetchedData));
     } catch (error) {
       console.error("Error fetching expenses data:", error);
-      toast.error("Failed to fetch expenses data.");
+      toast.error("Failed to fetch expenses data.", { containerId: "expenses" });
     }
   };
 
@@ -47,9 +110,11 @@ const Expense = () => {
       id: item.id,
       name: item.name,
       amount: item.amount.toFixed(2),
+      startDate: item.startDate ? item.startDate.substring(0, 10) : "",
+      endDate: item.endDate ? item.endDate.substring(0, 10) : "",
       action: (
         <>
-          <IconButton onClick={() => handleEditClick(item.id, item.name, item.amount)}>
+          <IconButton onClick={() => handleEditClick(item)}>
             <EditIcon />
           </IconButton>
           <IconButton onClick={() => handleDeleteClick(item.id)}>
@@ -60,33 +125,32 @@ const Expense = () => {
     }));
   };
 
-  const handleEditClick = (id, currentName, currentAmount) => {
-    setEditingId(id);
-    setEditingName(currentName);
-    setEditingAmount(currentAmount);
+  const handleEditClick = (item) => {
+    const formattedItem = {
+      ...item,
+      startDate: item.startDate ? new Date(item.startDate).toLocaleDateString("en-CA") : "",
+      endDate: item.endDate ? new Date(item.endDate).toLocaleDateString("en-CA") : ""
+    };
+    setEditingExpense(formattedItem);
     setIsEditModalOpen(true);
   };
 
-  const handleSaveClick = async () => {
+  const handleSaveClick = async (e) => {
+    e.preventDefault();
     try {
-      await axios.put(`https://localhost:7171/api/Expense/UpdatExpense?id=${editingId}`, {
-        id: editingId,
-        name: editingName,
-        amount: editingAmount
-      });
+      await axios.put(`https://localhost:7171/api/Expense/UpdatExpense?id=${editingExpense.id}`, editingExpense);
       setRows((prevRows) =>
         prevRows.map((row) =>
-          row.id === editingId ? { ...row, name: editingName, amount: editingAmount.toFixed(2) } : row
+          row.id === editingExpense.id
+            ? { ...row, ...editingExpense, amount: editingExpense.amount.toFixed(2) }
+            : row
         )
       );
-      setEditingId(null);
-      setEditingName("");
-      setEditingAmount(0);
       setIsEditModalOpen(false);
-      toast.success("Expense updated successfully!");
+      toast.success("Expense updated successfully!", { autoClose: 2000, containerId: "expenses" });
     } catch (error) {
       console.error("Error updating expense:", error);
-      toast.error("Failed to update expense.");
+      toast.error("Failed to update expense.", { autoClose: 2000, containerId: "expenses" });
     }
   };
 
@@ -94,91 +158,32 @@ const Expense = () => {
     try {
       await axios.delete(`https://localhost:7171/api/Expense/DeleteExpense?id=${id}`);
       setRows((prevRows) => prevRows.filter((row) => row.id !== id));
-      toast.success("Expense deleted successfully!");
+      toast.success("Expense deleted successfully!", { autoClose: 2000, containerId: "expenses" });
     } catch (error) {
       console.error("Error deleting expense:", error);
-      toast.error("Failed to delete expense.");
+      toast.error("Failed to delete expense.", { autoClose: 2000, containerId: "expenses" });
     }
   };
 
-  const handleAddExpense = async (event) => {
-    event.preventDefault();
+  const handleAddExpense = async (e) => {
+    e.preventDefault();
     try {
-      await axios.post('https://localhost:7171/api/Expense/AddExpense', {
-        name: newExpenseName,
-        amount: newExpenseAmount
-      });
-      toast.success("Expense added successfully!");
-      setNewExpenseName("");
-      setNewExpenseAmount(0);
+      await axios.post("https://localhost:7171/api/Expense/AddExpense", newExpense);
+      toast.success("Expense added successfully!", { autoClose: 2000, containerId: "expenses" });
       fetchExpenses();
+      setNewExpense({ name: "", amount: 0, startDate: "", endDate: "" });
       setIsAddModalOpen(false);
     } catch (error) {
       console.error("Error adding expense:", error);
-      toast.error("Failed to add expense.");
-    }
-  };
-
-  const toggleAddModal = () => setIsAddModalOpen(!isAddModalOpen);
-
-  const toggleEditModal = () => {
-    setIsEditModalOpen(!isEditModalOpen);
-    if (isEditModalOpen) {
-      setEditingId(null);
+      toast.error("Failed to add expense.", { autoClose: 2000, containerId: "expenses" });
     }
   };
 
   const handleSearch = (event) => setSearchTerm(event.target.value);
 
-  const filteredRows = rows.filter(row =>
+  const filteredRows = rows.filter((row) =>
     row.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const formattedRows = filteredRows.map((row) => ({
-    ...row,
-    expenseName: (
-      <MDBox display="flex" alignItems="center" lineHeight={1}>
-        <MDBox ml={2} lineHeight={1}>
-          {row.id === editingId ? (
-            <MDInput
-              value={editingName}
-              onChange={(e) => setEditingName(e.target.value)}
-              fullWidth
-            />
-          ) : (
-            <MDTypography display="block" variant="button" fontWeight="medium">
-              {row.name}
-            </MDTypography>
-          )}
-        </MDBox>
-      </MDBox>
-    ),
-    expenseAmount: (
-      <MDBox display="flex" alignItems="center" lineHeight={1}>
-        <MDBox ml={2} lineHeight={1}>
-          {row.id === editingId ? (
-            <MDInput
-              type="number"
-              value={editingAmount}
-              onChange={(e) => setEditingAmount(parseFloat(e.target.value))}
-              fullWidth
-            />
-          ) : (
-            <MDTypography display="block" variant="button" fontWeight="medium">
-              {row.amount}
-            </MDTypography>
-          )}
-        </MDBox>
-      </MDBox>
-    ),
-    action: row.id === editingId ? (
-      <IconButton onClick={handleSaveClick}>
-        <SaveIcon />
-      </IconButton>
-    ) : (
-      row.action
-    ),
-  }));
 
   return (
     <DashboardLayout>
@@ -188,122 +193,70 @@ const Expense = () => {
           <Grid item xs={12}>
             <Card>
               <MDBox mx={2} mt={-3} py={3} px={2} variant="gradient" bgColor="info" borderRadius="lg" coloredShadow="info">
-                <MDTypography variant="h6" color="white">Expenses</MDTypography>
+                <MDTypography variant="h6" color="white">
+                  Expenses
+                </MDTypography>
               </MDBox>
               <MDBox pt={3} px={2}>
                 <MDInput
                   type="text"
                   placeholder="Search Expense"
-                  style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', marginBottom: '20px' }}
+                  style={searchStyle}
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <button
-                  onClick={toggleAddModal}
-                  style={{ padding: '10px 20px', backgroundColor: '#344767', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px', fontSize: '16px', marginBottom: '20px' }}
-                >
+                <button onClick={() => setIsAddModalOpen(true)} style={addButtonStyle}>
                   Add New
                 </button>
                 <DataTable
                   table={{
                     columns: [
-                      { Header: "Name", accessor: "expenseName", align: "left" },
-                      { Header: "Amount", accessor: "expenseAmount", align: "center" },
-                      { Header: "Action", accessor: "action", align: "center" }
+                      { Header: "Name", accessor: "name", align: "left" },
+                      { Header: "Amount", accessor: "amount", align: "center" },
+                      { Header: "Start Date", accessor: "startDate", align: "center" },
+                      { Header: "End Date", accessor: "endDate", align: "center" },
+                      { Header: "Actions", accessor: "action", align: "center" },
                     ],
-                    rows: formattedRows
+                    rows: filteredRows,
                   }}
                 />
               </MDBox>
-              {isAddModalOpen && (
-                <div
-                  style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <div
-                    style={{ background: '#fff', padding: '20px', borderRadius: '8px', width: '400px' }}
-                  >
-                    <h2>Add New Expense</h2>
-                    <form onSubmit={handleAddExpense}>
-                      <MDInput
-                        type="text"
-                        placeholder="Expense Name"
-                        value={newExpenseName}
-                        onChange={(e) => setNewExpenseName(e.target.value)}
-                        fullWidth
-                      />
-                      <MDInput
-                        type="number"
-                        placeholder="Amount"
-                        value={newExpenseAmount}
-                        onChange={(e) => setNewExpenseAmount(parseFloat(e.target.value))}
-                        fullWidth
-                      />
-                      <button
-                        type="submit"
-                        style={{ padding: '10px 20px', backgroundColor: '#344767', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px', fontSize: '16px', marginTop: '10px' }}
-                      >
-                        Add
-                      </button>
-                      <button
-                        type="button"
-                        onClick={toggleAddModal}
-                        style={{ padding: '10px 20px', backgroundColor: '#d9534f', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px', fontSize: '16px', marginTop: '10px', marginLeft: '10px' }}
-                      >
-                        Cancel
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              )}
-              {isEditModalOpen && (
-                <div
-                  style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <div
-                    style={{ background: '#fff', padding: '20px', borderRadius: '8px', width: '400px' }}
-                  >
-                    <h2>Edit Expense</h2>
-                    <form>
-                      <MDInput
-                        type="text"
-                        placeholder="Expense Name"
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        fullWidth
-                      />
-                      <MDInput
-                        type="number"
-                        placeholder="Amount"
-                        value={editingAmount}
-                        onChange={(e) => setEditingAmount(parseFloat(e.target.value))}
-                        fullWidth
-                      />
-                      <button
-                        type="button"
-                        onClick={handleSaveClick}
-                        style={{ padding: '10px 20px', backgroundColor: '#344767', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px', fontSize: '16px', marginTop: '10px' }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={toggleEditModal}
-                        style={{ padding: '10px 20px', backgroundColor: '#d9534f', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px', fontSize: '16px', marginTop: '10px', marginLeft: '10px' }}
-                      >
-                        Cancel
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              )}
             </Card>
           </Grid>
         </Grid>
       </MDBox>
       <Footer />
-      <ToastContainer />
+      {/* Add Modal */}
+      <ExpenseModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddExpense}
+        expenseData={newExpense}
+        setExpenseData={setNewExpense}
+        title="Add Expense"
+      />
+      {/* Edit Modal */}
+      <ExpenseModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleSaveClick}
+        expenseData={editingExpense}
+        setExpenseData={setEditingExpense}
+        title="Edit Expense"
+      />
+      {/* Toast Containers */}
+      <ToastContainer containerId="expenses" position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
     </DashboardLayout>
   );
 };
+
+// Styling
+const searchStyle = { width: "20%", marginBottom: "10px" };
+const addButtonStyle = { marginLeft: "20px", backgroundColor: "green", color: "white", borderRadius: "5px", padding: "10px" };
+const modalOverlayStyle = { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" };
+const modalStyle = { backgroundColor: "white", padding: "20px", borderRadius: "10px", width: "400px" };
+const buttonGroupStyle = { display: "flex", justifyContent: "space-between", marginTop: "20px" };
+const saveButtonStyle = { backgroundColor: "green", color: "white", border: "none", padding: "10px", borderRadius: "5px" };
+const cancelButtonStyle = { backgroundColor: "red", color: "white", border: "none", padding: "10px", borderRadius: "5px" };
 
 export default Expense;

@@ -10,6 +10,7 @@ import Billing from "layouts/billing";
 import PaymentManagement from "layouts/Payment/payment";
 import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
 import PurchaseProduct from "layouts/PurchasProduct/PurchaseProduct";
+import SalesDashboard from "layouts/SalesDashboard/SalesDashboard";
 import Expense from "layouts/expense/expense";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -23,7 +24,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import SupplierIcon from '@mui/icons-material/Business';
 import PaymentIcon from '@mui/icons-material/Payment';
 import DescriptionIcon from '@mui/icons-material/Description';
-
+import ProfitDashboard from "layouts/ProfitDashboard/ProfitDashboard";
 import Icon from "@mui/material/Icon";
 import { Navigate } from "react-router-dom";
 
@@ -38,11 +39,32 @@ const routes = [
   {
     type: "collapse",
     name: "Dashboard",
-    key: "dashboard",
+    key: "Dashboard",
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
-    component: isAuthenticated() ? <Dashboard /> : <Navigate to="/authentication/sign-in" />,
+    component: isAuthenticated() ? <SalesDashboard /> : <Navigate to="/authentication/sign-in" />,
   },
+  // {
+  //   type: "collapse",
+  //   name: "Sales Dashboard",
+  //   key: "SalesDashboard",
+  //   icon: <Icon fontSize="small">dashboard</Icon>,
+  //   route: "/SalesDashboard",
+  //   component: isAuthenticated() ? <SalesDashboard /> : <Navigate to="/authentication/sign-in" />,
+  // },
+  {
+    icon: <PaymentIcon fontSize="small" />,
+    route: "/SalesDashboard",
+    component: isAuthenticated() ? <SalesDashboard /> : <Navigate to="/authentication/sign-in" />,
+  },
+  // {
+  //   type: "collapse",
+  //   name: "Profit Dashboard",
+  //   key: "ProfitDashboard",
+  //   icon: <PaymentIcon fontSize="small" />,
+  //   route: "/ProfitDashboard",
+  //   component: isAuthenticated() ? <ProfitDashboard /> : <Navigate to="/authentication/sign-in" />,
+  // },
   {
     type: "collapse",
     name: "Category Products",
@@ -76,6 +98,7 @@ const routes = [
     route: "/Payment",
     component: isAuthenticated() ? <PaymentManagement /> : <Navigate to="/authentication/sign-in" />,
   },
+ 
   {
     type: "collapse",
     name: "DocumentType",
@@ -124,6 +147,12 @@ const routes = [
     route: "/PurchaseProduct",
     component: isAuthenticated() ? <PurchaseProduct /> : <Navigate to="/authentication/sign-in" />,
   },
+  {
+    icon: <PaymentIcon fontSize="small" />,
+    route: "/ProfitDashboard",
+    component: isAuthenticated() ? <ProfitDashboard /> : <Navigate to="/authentication/sign-in" />,
+  },
+ 
   {
     type: "collapse",
     name: "RTL",

@@ -7,6 +7,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { getDailyRevenue, getWeeklyRevenue, getMonthlyRevenue, getYearlyRevenue, getWeeklySalesData, getDailySalesData, getYearlySalesData } from 'Services/revenueService';
 
 // Register required Chart.js components
@@ -20,7 +21,8 @@ function Dashboard() {
   const [weeklySalesData, setWeeklySalesData] = useState({});
   const [dailySalesData, setDailySalesData] = useState({});
   const [yearlySalesData, setYearlySalesData] = useState({});
-
+  
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchRevenues = async () => {
       try {
@@ -51,6 +53,8 @@ function Dashboard() {
 
     fetchRevenues();
   }, []);
+
+  
 
   const formatChartData = (data) => {
     const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -109,6 +113,47 @@ function Dashboard() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
+      <button 
+    onClick={() => navigate('/ProfitDashboard')} 
+    style={{
+        backgroundColor: '#4CAF50', // Green background
+        color: 'white',              // White text
+        padding: '15px 30px',        // Padding to make the button larger
+        fontSize: '18px',            // Larger font size
+        borderRadius: '8px',         // Rounded corners
+        border: 'none',              // No border
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)', // Soft shadow
+        cursor: 'pointer',           // Pointer cursor on hover
+        transition: 'all 0.3s ease', // Smooth transition on hover
+        letterSpacing: '1px',        // Spacing between letters
+        textTransform: 'uppercase',  // Make the text uppercase
+    }}
+    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'} // Darken background on hover
+    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}  // Reset background on mouse out
+>
+    Profit
+</button>
+<button 
+    onClick={() => navigate('/SalesDashboard')} 
+    style={{
+        backgroundColor: '#4CAF50', // Green background
+        color: 'white',              // White text
+        padding: '15px 30px',        // Padding to make the button larger
+        fontSize: '18px',            // Larger font size
+        borderRadius: '8px',         // Rounded corners
+        border: 'none',              // No border
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)', // Soft shadow
+        cursor: 'pointer',           // Pointer cursor on hover
+        transition: 'all 0.3s ease', // Smooth transition on hover
+        letterSpacing: '1px',        // Spacing between letters
+        textTransform: 'uppercase',  // Make the text uppercase
+    }}
+    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'} // Darken background on hover
+    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}  // Reset background on mouse out
+>
+    Sale
+</button>
+
       <MDBox py={3}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>

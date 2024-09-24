@@ -1,31 +1,11 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
-
-// @mui material components
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
 import Icon from "@mui/material/Icon";
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
-function ComplexStatisticsCard({ color, title, count, percentage, icon }) {
+function ComplexStatisticsCard({ color, title, count, percentage, percentage1, icon }) {
   return (
     <Card>
       <MDBox display="flex" justifyContent="space-between" pt={1} px={2}>
@@ -55,17 +35,28 @@ function ComplexStatisticsCard({ color, title, count, percentage, icon }) {
       </MDBox>
       <Divider />
       <MDBox pb={2} px={2}>
-        <MDTypography component="p" variant="button" color="text" display="flex">
-          <MDTypography
-            component="span"
-            variant="button"
-            fontWeight="bold"
-            color={percentage.color}
-          >
-            {percentage.amount}
-          </MDTypography>
-          &nbsp;{percentage.label}
+        <MDTypography component="p" variant="button" color="text">
+          {percentage && (
+            <>
+              <MDTypography component="span" variant="button" fontWeight="bold" color={percentage.color}>
+                {percentage.amount}
+              </MDTypography>
+              &nbsp;{percentage.label}
+            </>
+          )}
         </MDTypography>
+
+        {percentage1 && (
+          <>
+            {/* <br /> Line break for the new line */}
+            <MDTypography component="p" variant="button" color="text">
+              <MDTypography component="span" variant="button" fontWeight="bold" color="error">
+                {percentage1.amount}
+              </MDTypography>
+              &nbsp;{percentage1.label}
+            </MDTypography>
+          </>
+        )}
       </MDBox>
     </Card>
   );
@@ -76,7 +67,12 @@ ComplexStatisticsCard.defaultProps = {
   color: "info",
   percentage: {
     color: "success",
-    text: "",
+    amount: "",
+    label: "",
+  },
+  percentage1: {
+    color: "error", // Default color for the second percentage
+    amount: "",
     label: "",
   },
 };
@@ -92,11 +88,13 @@ ComplexStatisticsCard.propTypes = {
     "error",
     "light",
     "dark",
+    "red", // Added red color
   ]),
   title: PropTypes.string.isRequired,
   count: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   percentage: PropTypes.shape({
     color: PropTypes.oneOf([
+      "error",
       "primary",
       "secondary",
       "info",
@@ -105,6 +103,23 @@ ComplexStatisticsCard.propTypes = {
       "error",
       "dark",
       "white",
+      "red", // Added red color
+    ]),
+    amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    label: PropTypes.string,
+  }),
+  percentage1: PropTypes.shape({
+    color: PropTypes.oneOf([
+      "danger",
+      "primary",
+      "secondary",
+      "info",
+      "success",
+      "warning",
+      "error",
+      "dark",
+      "white",
+      "red", // Added red color
     ]),
     amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     label: PropTypes.string,
