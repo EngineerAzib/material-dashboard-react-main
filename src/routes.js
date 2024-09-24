@@ -10,6 +10,7 @@ import Billing from "layouts/billing";
 import PaymentManagement from "layouts/Payment/payment";
 import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
 import PurchaseProduct from "layouts/PurchasProduct/PurchaseProduct";
+import SaleHistory from "layouts/SaleHistory/SaleHistory";
 import Expense from "layouts/expense/expense";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -68,6 +69,16 @@ const routes = [
     component: isAuthenticated() ? <StaffTable /> : <Navigate to="/authentication/sign-in" />,
 
   },
+  {
+    type: "collapse",
+    name: "SalarHistory",
+    key: "SaleHistory",
+    icon: <GroupIcon fontSize="small" />,
+    route: "/Salehistory",
+    component: isAuthenticated() ? <SaleHistory /> : <Navigate to="/authentication/sign-in" />,
+
+  },
+
   {
     type: "collapse",
     name: "Payment",
