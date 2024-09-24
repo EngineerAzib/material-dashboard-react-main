@@ -44,31 +44,44 @@ const PurchaseOrder = () => {
 
   const fetchInitialData = async () => {
     try {
-      const [suppliersResponse, productsResponse, purchaseOrdersResponse] =
-        await Promise.all([
-          axios.get("https://localhost:7171/api/Supplier/GetSupplier"),
-          axios.get("https://localhost:7171/GetProduct"),
-          axios.get("https://localhost:7171/api/Purchaseorder/GetPurchaseOrde"),
-        ]);
-      console.log(purchaseOrdersResponse);
+      // Fetch products and suppliers first, then fetch purchase orders
+      const [suppliersResponse, productsResponse] = await Promise.all([
+        axios.get("https://localhost:7171/api/Supplier/GetSupplier"),
+        axios.get("https://localhost:7171/GetProduct"),
+      ]);
+  
+      // Set suppliers and products after fetching
       setSuppliers(suppliersResponse.data || []);
       setProducts(productsResponse.data || []);
-      setPurchaseOrders(formatOrderData(purchaseOrdersResponse.data || []));
-    } catch (error) {
-      toast.error("Failed to fetch data.");
-    }
-  };
+  
+      // Fetch purchase orders after setting products and suppliers
+      const purchaseOrdersResponse = await axios.get(
+        "https://localhost:7171/api/Purchaseorder/GetPurchaseOrde"
+      );
+       // Log fetched purchase orders data
+    console.log("Purchase Orders Data:", purchaseOrdersResponse.data);
+      const formattedOrders = formatOrderData(purchaseOrdersResponse.data || []);
+    setPurchaseOrders(formattedOrders);
+  } catch (error) {
+    toast.error("Failed to fetch data.");
+  }
+};
 
+  
   const formatOrderData = (orders) => {
     return orders.map((order) => {
       const product = products.find((product) => product.id === order.productId);
       const supplier = suppliers.find(
         (supplier) => supplier.id === order.suplierId
       );
+  
+      // Format date strings to display only date, without time
+      const formattedGiveDate = new Date(order.oderGiveDate).toLocaleDateString();
+      const formattedReceiveDate = new Date(order.oderReceiveDate).toLocaleDateString();
       return {
         id: order.id,
-        oderGiveDate: order.oderGiveDate,
-        oderReceiveDate: order.oderReceiveDate,
+        oderGiveDate:formattedGiveDate,
+        oderReceiveDate: formattedReceiveDate,
         orderStatus: order.orderStatus ? "Completed" : "Pending",
         paymentStatus: order.paymentStatus ? "Paid" : "Unpaid",
         unitPrice: order.unitPrice,
@@ -77,8 +90,8 @@ const PurchaseOrder = () => {
         receiveQuantity: order.receiveQuantity,
         totalPayment: order.totalPayment,
         paidPayment: order.paidPayment,
-        product: product ? product.name : "N/A",
-        supplier: supplier ? supplier.supplierName : "N/A",
+        product: order.productName || "N/A",
+        supplier: order.supplierName || "N/A", 
         actions: (
           <>
             <IconButton onClick={() => handleEditClick(order)}>
@@ -378,7 +391,7 @@ const PurchaseOrder = () => {
                   <option value="">Select Product</option>
                   {products.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.name}
+                      {product.productName}
                     </option>
                   ))}
                 </select>
