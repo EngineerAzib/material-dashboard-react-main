@@ -25,9 +25,11 @@
     "axios": "^1.7.4",
     "chart.js": "^4.3.0",
     "chroma-js": "2.4.2",
+
     "date-fns": "^2.29.3",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.3",
+
     "lucide-react": "^0.441.0",
     "prop-types": "15.8.1",
     "react": "18.2.0",
