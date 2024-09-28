@@ -185,83 +185,99 @@ const Product = () => {
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
+  
   const modalStyles = {
+    label :{
+      display: 'flex',
+      flexDirection: 'column',
+      flex: 1,
+      marginRight: '10px', /* Or any spacing you need */
+      fontSize:"11px"
+    },
     button: {
-      padding: '10px 20px',
-      backgroundColor: '#344767',
-      color: 'white',
-      border: 'none',
-      cursor: 'pointer',
-      borderRadius: '5px',
-      fontSize: '16px',
-      marginRight: '10px',
-    },
-    overlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-    },
-    modal: {
-      backgroundColor: 'white',
-      padding: '20px',
-      borderRadius: '10px',
-      width: '400px',
-      maxWidth: '80%',
-      position: 'relative',
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px',
-    },
-    closeButton: {
-      background: 'none',
-      border: 'none',
-      fontSize: '24px',
-      cursor: 'pointer',
-      color: '#344767',
+      padding: '10px',
+        backgroundColor: '#344767',
+        color: 'white',
+        border: 'none',
+        cursor: 'pointer',
+        borderRadius: '5px',
+        fontSize: '16px',
+        marginleft: '10px',
     },
     input: {
       width: '100%',
       padding: '10px',
       border: '1px solid #ccc',
       borderRadius: '5px',
-      marginBottom: '15px',
+  },
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 2000, // Increase z-index value to ensure modal appears above other content
     },
+    modal: {
+        backgroundColor: 'white',
+        padding: '20px',
+        borderRadius: '10px',
+        width: '400px',
+        maxWidth: '80%',
+        position: 'relative',
+        zIndex: 2100, // Optional: set z-index for modal itself
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+    },
+    closeButton: {
+        background: 'none',
+        border: 'none',
+        fontSize: '24px',
+        cursor: 'pointer',
+        color: '#344767',
+    },
+    inputContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        gap: '10px', // Space between the input fields
+        marginBottom: '15px',
+    },
+   
     footer: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      marginTop: '20px',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginTop: '20px',
     },
     submitButton: {
-      padding: '10px 20px',
-      backgroundColor: '#344767',
-      color: 'white',
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-      fontSize: '16px',
+        padding: '10px 20px',
+        backgroundColor: '#344767',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontSize: '16px',
     },
     cancelButton: {
-      padding: '10px 20px',
-      backgroundColor: '#f44336',
-      color: 'white',
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-      fontSize: '16px',
-      marginRight: '10px',
+        padding: '10px 20px',
+        backgroundColor: '#f44336',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontSize: '16px',
+        marginRight: '10px',
     },
-  };
+};
+
 
   return (
     <DashboardLayout>
@@ -306,107 +322,132 @@ const Product = () => {
       <ToastContainer />
       {/* Add and Edit Modal */}
       {(isModalOpen.add || isModalOpen.edit) && (
-        <div style={modalStyles.overlay}>
-          <div style={modalStyles.modal}>
-            <div style={modalStyles.header}>
-              <h3>{editingProduct ? "Edit Product" : "Add Product"}</h3>
-              <button style={modalStyles.closeButton} onClick={closeModal}>×</button>
-            </div>
-            <form onSubmit={editingProduct ? handleEditProduct : handleAddProduct}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Product Name"
-                style={modalStyles.input}
-                value={newProduct.name}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                type="number"
-                name="quantity"
-                placeholder="Quantity"
-                style={modalStyles.input}
-                value={newProduct.quantity}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                type="number"
-                name="price"
-                placeholder="Price"
-                style={modalStyles.input}
-                value={newProduct.price}
-                onChange={handleInputChange}
-                required
-              />
-              <select
-                name="category"
-                style={modalStyles.input}
-                value={newProduct.category}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.catName}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                name="isLowStockWarring"
-                placeholder="Low Stock Warning (Quantity)"
-                style={modalStyles.input}
-                value={newProduct.isLowStockWarring}
-                onChange={handleInputChange}
-                required
-              />
-              {/* <input
-                type="file"
-                name="image"
-                accept="image/*"
-                style={modalStyles.input}
-                onChange={handleInputChange}
-              /> */}
-              <input
-                type="text"
-                name="barCode"
-                placeholder="Barcode"
-                style={modalStyles.input}
-                value={newProduct.barCode}
-                onChange={handleInputChange}
-              />
-              <button type="button" onClick={generateBarcode} style={modalStyles.button}>
-                Generate Barcode
-              </button>
-              <select
-                name="supplierId"
-                style={modalStyles.input}
-                value={newProduct.supplierId}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Supplier</option>
-                {suppliers.map((supplier) => (
-                  <option key={supplier.id} value={supplier.id}>
-                    {supplier.supplierName}
-                  </option>
-                ))}
-              </select>
-              <div style={modalStyles.footer}>
-                <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
-                  Cancel
-                </button>
-                <button type="submit" style={modalStyles.submitButton}>
-                  {editingProduct ? "Update" : "Add"} Product
-                </button>
-              </div>
-            </form>
-          </div>
+  <div style={modalStyles.overlay}>
+    <div style={modalStyles.modal}>
+      <div style={modalStyles.header}>
+        <h3>{editingProduct ? "Edit Product" : "Add Product"}</h3>
+        <button style={modalStyles.closeButton} onClick={closeModal}>×</button>
+      </div>
+      <form onSubmit={editingProduct ? handleEditProduct : handleAddProduct}>
+        {/* Row for Product Name and Quantity */}
+        <div style={modalStyles.inputContainer}>
+          <label style={modalStyles.label}>
+            Product Name
+            <input
+              type="text"
+              name="name"
+              placeholder="Product Name"
+              style={{ ...modalStyles.input, flex: 1, marginRight: '10px' }}
+              value={newProduct.name}
+              onChange={handleInputChange}
+              required
+            />
+          </label>
+          <label style={modalStyles.label}>
+            Quantity
+            <input
+              type="number"
+              name="quantity"
+              placeholder="Quantity"
+              style={{ ...modalStyles.input, flex: 1 }}
+              value={newProduct.quantity}
+              onChange={handleInputChange}
+              required
+            />
+          </label>
         </div>
-      )}
+        {/* Row for Price and Low Stock Warning */}
+        <div style={modalStyles.inputContainer}>
+          <label style={modalStyles.label}>
+            Price
+            <input
+              type="number"
+              name="price"
+              placeholder="Price"
+              style={{ ...modalStyles.input, flex: 1, marginRight: '10px' }}
+              value={newProduct.price}
+              onChange={handleInputChange}
+              required
+            />
+          </label>
+          <label style={modalStyles.label}>
+            Low Stock Warning (Quantity)
+            <input
+              type="number"
+              name="isLowStockWarring"
+              placeholder="Low Stock Warning (Quantity)"
+              style={{ ...modalStyles.input, flex: 1 }}
+              value={newProduct.isLowStockWarring}
+              onChange={handleInputChange}
+              required
+            />
+          </label>
+        </div>
+        <div style={modalStyles.inputContainer}>
+          <label style={modalStyles.label}>
+            Barcode
+            <input
+              type="text"
+              name="barCode"
+              placeholder="Barcode"
+              style={{ ...modalStyles.input, flex: 1 }}
+              value={newProduct.barCode}
+              onChange={handleInputChange}
+            />
+          </label>
+          <label style={modalStyles.label}>
+            Category
+            <select
+              name="category"
+              style={{ ...modalStyles.input, flex: 1 }}
+              value={newProduct.category}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.catName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div style={modalStyles.inputContainer}>
+          <button type="button" onClick={generateBarcode} style={modalStyles.button}>
+            Generate Barcode
+          </button>
+          <label style={modalStyles.label}>
+            Supplier
+            <select
+              name="supplierId"
+              style={{ ...modalStyles.input, flex: 1 }}
+              value={newProduct.supplierId}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Supplier</option>
+              {suppliers.map((supplier) => (
+                <option key={supplier.id} value={supplier.id}>
+                  {supplier.supplierName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div style={modalStyles.footer}>
+          <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
+            Cancel
+          </button>
+          <button type="submit" style={modalStyles.submitButton}>
+            {editingProduct ? "Update" : "Add"} Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
     </DashboardLayout>
   );
 };

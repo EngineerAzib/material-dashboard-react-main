@@ -1,42 +1,24 @@
 import { useState, useEffect, useMemo } from "react";
-
-// react-router components
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-
-// @mui material components
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Icon from "@mui/material/Icon";
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
-
-// Material Dashboard 2 React example components
 import Sidenav from "examples/Sidenav";
 import Configurator from "examples/Configurator";
-
-// Material Dashboard 2 React themes
 import theme from "assets/theme";
 import themeRTL from "assets/theme/theme-rtl";
-
-// Material Dashboard 2 React Dark Mode themes
 import themeDark from "assets/theme-dark";
 import themeDarkRTL from "assets/theme-dark/theme-rtl";
 import LowStockNotification from "NotificationComponent/LowStockNotification";
-// RTL plugins
 import rtlPlugin from "stylis-plugin-rtl";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
-
-// Material Dashboard 2 React routes
-import routes from "routes";
-
-// Material Dashboard 2 React contexts
+import routes from "routes"; // Ensure this includes your Billing route
 import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "context";
-
-// Images
 import brandWhite from "assets/images/logo-ct.png";
 import brandDark from "assets/images/logo-ct-dark.png";
+import Billing from "layouts/billing"; // Import the Billing component
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -50,11 +32,12 @@ export default function App() {
     whiteSidenav,
     darkMode,
   } = controller;
+
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [rtlCache, setRtlCache] = useState(null);
   const { pathname } = useLocation();
 
-  // NEW STATE: Sidebar Toggle State
+  // Sidebar Toggle State
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Cache for the rtl
@@ -63,15 +46,8 @@ export default function App() {
       key: "rtl",
       stylisPlugins: [rtlPlugin],
     });
-
     setRtlCache(cacheRtl);
   }, []);
-
-  // Toggle sidebar
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-    setMiniSidenav(dispatch, !miniSidenav); // Trigger the mini sidenav logic
-  };
 
   // Open sidenav when mouse enter on mini sidenav
   const handleOnMouseEnter = () => {
@@ -81,7 +57,7 @@ export default function App() {
     }
   };
 
-  // Close sidenav when mouse leave mini sidenav
+  // Close sidenav when mouse leaves mini sidenav
   const handleOnMouseLeave = () => {
     if (onMouseEnter) {
       setMiniSidenav(dispatch, true);
@@ -101,6 +77,9 @@ export default function App() {
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
+
+    // Hide sidebar if the current path is '/billing'
+    setSidebarOpen(pathname !== "/billing");
   }, [pathname]);
 
   const getRoutes = (allRoutes) =>
@@ -146,14 +125,11 @@ export default function App() {
         <CssBaseline />
         {layout === "dashboard" && (
           <>
-            <button className="toggle-btn" onClick={toggleSidebar}>
-              {sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-            </button>
             {sidebarOpen && (
               <Sidenav
                 color={sidenavColor}
                 brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-                brandName="Material Dashboard "
+                brandName="Material Dashboard"
                 routes={routes}
                 onMouseEnter={handleOnMouseEnter}
                 onMouseLeave={handleOnMouseLeave}
@@ -175,10 +151,7 @@ export default function App() {
       <CssBaseline />
       {layout === "dashboard" && (
         <>
-          <button className="toggle-btn" onClick={toggleSidebar}>
-            {sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-          </button>
-          {sidebarOpen && (
+          {sidebarOpen && pathname !== "/billing" && ( // Hide sidebar if on Billing layout
             <Sidenav
               color={sidenavColor}
               brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}

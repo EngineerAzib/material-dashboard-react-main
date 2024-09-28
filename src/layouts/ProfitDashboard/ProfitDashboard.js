@@ -8,6 +8,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import { useNavigate } from 'react-router-dom';
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
+import { Audio } from 'react-loader-spinner'; // Import loader
 import { 
   GetDayProfit, 
   GetWeeklyProfit, 
@@ -44,7 +45,7 @@ function ProfitDashboard() {
   const [yearlyProfitComparison, setYearlyProfitComparison] = useState(0);
 
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(true); 
   useEffect(() => {
     const fetchProfits = async () => {
       try {
@@ -78,8 +79,10 @@ function ProfitDashboard() {
         setWeeklyProfitComparison(weeklyComp);
         setMonthlyProfitComparison(monthlyComp);
         setYearlyProfitComparison(yearlyComp);
+        setLoading(false); 
       } catch (error) {
         console.error('Failed to fetch profit data:', error);
+        setLoading(false);
       }
     };
 
@@ -103,7 +106,19 @@ function ProfitDashboard() {
   const weeklySalesChartData = formatChartData(weeklyProfitData, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
   const dailySalesChartData = formatChartData(dailyProfitData, ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]);
   const yearlySalesChartData = formatChartData(yearlyProfitData, ["Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", "Sep-Oct", "Nov-Dec"]);
-
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Audio
+          height="100"
+          width="100"
+          color="#4fa94d"
+          ariaLabel="audio-loading"
+          visible={true}
+        />
+      </div>
+    );
+  }
   return (
     <DashboardLayout>
       <DashboardNavbar />

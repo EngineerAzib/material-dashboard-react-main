@@ -74,8 +74,8 @@ const BillingHistory = () => {
      // id: item.paymentId,
       billername: item.billername,
       billingDate: new Date(item.billingDate).toLocaleDateString(),
-      invoiceNo: item.invoiceNo, // Add invoiceNo here
-      barCodeNumber: item.barCodeNumber, // Add barCodeNumber here
+      invoiceNo: String(item.invoiceNo || ""), // Ensure it's always a string
+      barCodeNumber: String(item.barCodeNumber || ""), // Ensure it's always a string
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       totalAmount: item.totalAmount,
@@ -142,8 +142,11 @@ const BillingHistory = () => {
   };
 
   const filteredSearchRows = filteredRows.filter((row) =>
-    (row.billername || "").toLowerCase().includes(searchTerm.toLowerCase())
+    (row.billername || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (String(row.invoiceNo) || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (String(row.barCodeNumber) || "").toLowerCase().includes(searchTerm.toLowerCase()) // Include invoiceNo in the search
   );
+  
 
   const generatePDFForRow = (row) => {
     const doc = new jsPDF();

@@ -27,6 +27,10 @@ const Billing = () => {
     console.log("Navigating to dashboard...");
     navigate("/dashboard");
   };
+  const handleRefundClick = () => {
+    console.log("Navigating to dashboard...");
+    navigate("/Salehistory");
+  };
   const renderSidebarButton = (icon, label, color = '',onClick) => (
     <button style={{
       ...styles.sidebarButton,
@@ -104,7 +108,7 @@ const handleQuantityChange = (index, value) => {
     updatedProducts[index].quantity = "";
     updatedProducts[index].amount = 0; // Set amount to 0 if quantity is empty
   } else {
-    const quantity = parseInt(value, 10) || 1;
+    const quantity = parseFloat(value) || 1;
     updatedProducts[index].quantity = quantity;
     updatedProducts[index].amount = quantity * updatedProducts[index].price;
   }
@@ -620,7 +624,7 @@ const handleGeneratePDF = async () => {
         {renderSidebarButton('👤', 'Customer')}
         {renderSidebarButton('💼', 'Cash drawer')}
         {renderSidebarButton('💾', 'Save sale')}
-        {renderSidebarButton('↩️', 'Refund')}
+        {renderSidebarButton('↩️', 'Refund','',handleRefundClick)}
         {renderSidebarButton('💳', 'Payment', '#4CAF50',handleOpenModal)}
         {renderSidebarButton('🔒', 'Lock')}
         {renderSidebarButton('🔄', 'Transfer')}

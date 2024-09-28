@@ -8,6 +8,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import { useNavigate } from 'react-router-dom';
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
+import { Audio } from 'react-loader-spinner'; // Import loader
 import {
   getDailyRevenue,
   getWeeklyRevenue,
@@ -59,6 +60,9 @@ function SalesDashboard() {
   const [weeklySalesData, setWeeklySalesData] = useState({});
   const [yearlySalesData, setYearlySalesData] = useState({});
 
+  // Loading state
+  const [loading, setLoading] = useState(true); // Initialize loading state
+
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
@@ -108,8 +112,10 @@ function SalesDashboard() {
         setWeeklySalesData(weeklySaleData);
         setYearlySalesData(yearlySaleData);
 
+        setLoading(false); // Set loading to false after data is fetched
       } catch (error) {
         console.error('Error fetching sales data:', error);
+        setLoading(false); // Set loading to false in case of error
       }
     };
 
@@ -132,6 +138,19 @@ function SalesDashboard() {
   const dailySalesChartData = formatChartData(dailySalesData, ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]);
   const yearlySalesChartData = formatChartData(yearlySalesData, ["Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", "Sep-Oct", "Nov-Dec"]);
 
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Audio
+          height="100"
+          width="100"
+          color="#4fa94d"
+          ariaLabel="audio-loading"
+          visible={true}
+        />
+      </div>
+    );
+  }
   return (
     <DashboardLayout>
       <DashboardNavbar />

@@ -25,6 +25,9 @@ const StaffTable = () => {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [newRole, setNewRole] = useState("");
+  const [newNIC, setNIC] = useState("");
+  const [newAddress, setAddress] = useState("");
+  const [newSalary, setSalary] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -50,9 +53,12 @@ const StaffTable = () => {
       name: item.name,
       phone: item.phone,
       role: item.role,
+      niC_number: item.niC_number,
+      address: item.address,
+      salary: item.salary,
       action: (
         <>
-          <IconButton onClick={() => handleEditClick(item.id, item.name, item.phone, item.role)}>
+          <IconButton onClick={() => handleEditClick(item.id, item.name, item.phone, item.role, item.niC_number, item.address, item.salary)}>
             <EditIcon />
           </IconButton>
           <IconButton onClick={() => handleDeleteClick(item.id)}>
@@ -63,13 +69,17 @@ const StaffTable = () => {
     }));
   };
 
-  const handleEditClick = (id, currentName, currentPhone, currentRole) => {
+  const handleEditClick = (id, currentName, currentPhone, currentRole, currentNIC, currentAddress, currentSalary) => {
     setEditingId(id);
     setEditingName(currentName);
     setEditingPhone(currentPhone);
     setEditingRole(currentRole);
+    setNIC(currentNIC);
+    setAddress(currentAddress);
+    setSalary(currentSalary);
     setIsEditModalOpen(true);
   };
+  
 
   const handleSaveClick = async () => {
     try {
@@ -77,18 +87,32 @@ const StaffTable = () => {
         id: editingId,
         name: editingName,
         phone: editingPhone,
-        role: editingRole
+        role: editingRole,
+        niC_number: newNIC,
+        address: newAddress,
+        salary: newSalary,
       });
       setRows((prevRows) =>
         prevRows.map((row) =>
-          row.id === editingId ? { ...row, name: editingName, phone: editingPhone, role: editingRole } : row
+          row.id === editingId ? {
+            ...row,
+            name: editingName,
+            phone: editingPhone,
+            role: editingRole,
+            niC_number: newNIC,
+            address: newAddress,
+            salary: newSalary,
+          } : row
         )
       );
       setEditingId(null);
-      setEditingName("");
-      setEditingPhone("");
-      setEditingRole("");
-      setIsEditModalOpen(false);
+    setEditingName("");
+    setEditingPhone("");
+    setEditingRole("");
+    setNIC("");
+    setAddress("");
+    setSalary("");
+    setIsEditModalOpen(false);
       toast.success("Staff updated successfully!");
     } catch (error) {
       console.error("Error updating staff:", error);
@@ -113,12 +137,18 @@ const StaffTable = () => {
       await axios.post('https://localhost:7171/api/Staff/AddStaff', {
         name: newName,
         phone: newPhone,
-        role: newRole
+        role: newRole,
+        niC_number: newNIC,
+        address: newAddress,
+        salary: newSalary,
       });
       toast.success("Staff added successfully!");
       setNewName("");
       setNewPhone("");
       setNewRole("");
+      setNIC("");
+      setAddress("");
+      setSalary("");
       setIsAddModalOpen(false);
       fetchStaffTable();
     } catch (error) {
@@ -139,7 +169,7 @@ const StaffTable = () => {
     row.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const Category = ({ name, phone, role, isEditing }) => (
+  const Category = ({ name, phone, role, isEditing,niC_number,address,salary }) => (
     <MDBox display="flex" alignItems="center" lineHeight={1}>
       <MDBox ml={2} lineHeight={1}>
         {isEditing ? (
@@ -179,6 +209,9 @@ const StaffTable = () => {
         phone={row.phone}
         role={row.role}
         isEditing={row.id === editingId}
+        niC_number={row.niC_number}
+        address={row.address}
+        salary={row.salary}
       />
     ),
     action: row.id === editingId ? (
@@ -278,9 +311,20 @@ const StaffTable = () => {
                   style={modalStyles.searchInput}
                 />
                 <DataTable
-                  table={{ columns: [{ Header: "Name", accessor: "name" }, { Header: "Phone", accessor: "phone" }, { Header: "Role", accessor: "role" }, { Header: "Actions", accessor: "action" }], rows: formattedRows }}
-                  isSorted={false}
-                />
+                 table={{
+                  columns: [
+                    { Header: "Name", accessor: "name" },
+                    { Header: "NIC Number", accessor: "niC_number" },
+                    { Header: "Address", accessor: "address" },
+                    { Header: "Salary", accessor: "salary" },
+                    { Header: "Phone", accessor: "phone" },
+                    { Header: "Role", accessor: "role" },
+                    { Header: "Actions", accessor: "action" }
+                  ],
+                  rows: formattedRows
+                }}
+                isSorted={false}
+              />
               </MDBox>
             </Card>
           </Grid>
@@ -288,86 +332,163 @@ const StaffTable = () => {
       </MDBox>
       <Footer />
       {isAddModalOpen && (
-        <div style={modalStyles.modalOverlay}>
-          <div style={modalStyles.modalContainer}>
-            <div style={modalStyles.modalHeader}>
-              <h3>Add New Staff</h3>
-              <button onClick={toggleAddModal} style={modalStyles.closeModalBtn}>&times;</button>
-            </div>
-            <form onSubmit={handleAddStaff}>
-              <div style={modalStyles.formGroup}>
-                <label>Name</label>
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  style={modalStyles.input}
-                  required
-                />
-              </div>
-              <div style={modalStyles.formGroup}>
-                <label>Phone</label>
-                <input
-                  type="text"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                  style={modalStyles.input}
-                  required
-                />
-              </div>
-              <div style={modalStyles.formGroup}>
-                <label>Role</label>
-                <input
-                  type="text"
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value)}
-                  style={modalStyles.input}
-                  required
-                />
-              </div>
-              <button type="submit" style={modalStyles.submitBtn}>Add Staff</button>
-            </form>
+  <div style={modalStyles.modalOverlay}>
+    <div style={modalStyles.modalContainer}>
+      <div style={modalStyles.modalHeader}>
+        <h3>Add New Staff</h3>
+        <button onClick={toggleAddModal} style={modalStyles.closeModalBtn}>&times;</button>
+      </div>
+      <form onSubmit={handleAddStaff}>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ flex: 1 }}>
+            <label>Name</label>
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              style={modalStyles.input}
+              required
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>Phone</label>
+            <input
+              type="text"
+              value={newPhone}
+              onChange={(e) => setNewPhone(e.target.value)}
+              style={modalStyles.input}
+              required
+            />
           </div>
         </div>
-      )}
-      {isEditModalOpen && (
-        <div style={modalStyles.modalOverlay}>
-          <div style={modalStyles.modalContainer}>
-            <div style={modalStyles.modalHeader}>
-              <h3>Edit Staff</h3>
-              <button onClick={() => setIsEditModalOpen(false)} style={modalStyles.closeModalBtn}>&times;</button>
-            </div>
-            <div style={modalStyles.formGroup}>
-              <label>Name</label>
-              <input
-                type="text"
-                value={editingName}
-                onChange={(e) => setEditingName(e.target.value)}
-                style={modalStyles.input}
-              />
-            </div>
-            <div style={modalStyles.formGroup}>
-              <label>Phone</label>
-              <input
-                type="text"
-                value={editingPhone}
-                onChange={(e) => setEditingPhone(e.target.value)}
-                style={modalStyles.input}
-              />
-            </div>
-            <div style={modalStyles.formGroup}>
-              <label>Role</label>
-              <input
-                type="text"
-                value={editingRole}
-                onChange={(e) => setEditingRole(e.target.value)}
-                style={modalStyles.input}
-              />
-            </div>
-            <button onClick={handleSaveClick} style={modalStyles.submitBtn}>Save Changes</button>
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+          <div style={{ flex: 1 }}>
+            <label>Role</label>
+            <input
+              type="text"
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value)}
+              style={modalStyles.input}
+              required
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>NIC Number</label>
+            <input
+              type="text"
+              value={newNIC}
+              onChange={(e) => setNIC(e.target.value)}
+              style={modalStyles.input}
+              required
+            />
           </div>
         </div>
-      )}
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+          <div style={{ flex: 1 }}>
+            <label>Address</label>
+            <input
+              type="text"
+              value={newAddress}
+              onChange={(e) => setAddress(e.target.value)}
+              style={modalStyles.input}
+              required
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>Salary</label>
+            <input
+              type="number"
+              value={newSalary}
+              onChange={(e) => setSalary(e.target.value)}
+              style={modalStyles.input}
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" style={modalStyles.submitBtn}>Add Staff</button>
+      </form>
+    </div>
+  </div>
+)}
+
+     {isEditModalOpen && (
+  <div style={modalStyles.modalOverlay}>
+    <div style={modalStyles.modalContainer}>
+      <div style={modalStyles.modalHeader}>
+        <h3>Edit Staff</h3>
+        <button onClick={() => setIsEditModalOpen(false)} style={modalStyles.closeModalBtn}>&times;</button>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ flex: 1 }}>
+          <label>Name</label>
+          <input
+            type="text"
+            value={editingName}
+            onChange={(e) => setEditingName(e.target.value)}
+            style={modalStyles.input}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label>Phone</label>
+          <input
+            type="text"
+            value={editingPhone}
+            onChange={(e) => setEditingPhone(e.target.value)}
+            style={modalStyles.input}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+        <div style={{ flex: 1 }}>
+          <label>Role</label>
+          <input
+            type="text"
+            value={editingRole}
+            onChange={(e) => setEditingRole(e.target.value)}
+            style={modalStyles.input}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label>NIC Number</label>
+          <input
+            type="text"
+            value={newNIC}
+            onChange={(e) => setNIC(e.target.value)}
+            style={modalStyles.input}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+        <div style={{ flex: 1 }}>
+          <label>Address</label>
+          <input
+            type="text"
+            value={newAddress}
+            onChange={(e) => setAddress(e.target.value)}
+            style={modalStyles.input}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label>Salary</label>
+          <input
+            type="number"
+            value={newSalary}
+            onChange={(e) => setSalary(e.target.value)}
+            style={modalStyles.input}
+          />
+        </div>
+      </div>
+
+      <button onClick={handleSaveClick} style={modalStyles.submitBtn}>Save Changes</button>
+    </div>
+  </div>
+)}
       <ToastContainer />
     </DashboardLayout>
   );
