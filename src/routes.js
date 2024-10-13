@@ -14,7 +14,7 @@ import PurchaseProduct from "layouts/PurchasProduct/PurchaseProduct";
 import SalesDashboard from "layouts/SalesDashboard/SalesDashboard";
 
 import SaleHistory from "layouts/SaleHistory/SaleHistory";
-
+import Company from "layouts/Company/Company";
 import Expense from "layouts/expense/expense";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -144,6 +144,14 @@ const routes = [
     icon: <SupplierIcon fontSize="small" />,
     route: "/supplier",
     component: isAuthenticated() ? <Supplier /> : <Navigate to="/authentication/sign-in" />,
+  },
+  {
+    type: "collapse",
+    name: "Company",
+    key: "Company",
+    icon: <SupplierIcon fontSize="small" />,
+    route: "/Company",
+    component: isAuthenticated() ? <Company /> : <Navigate to="/authentication/sign-in" />,
   },
   {
     type: "collapse",

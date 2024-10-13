@@ -391,7 +391,7 @@ const PurchaseOrder = () => {
                   <option value="">Select Product</option>
                   {products.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.productName}
+                      {product.name}
                     </option>
                   ))}
                 </select>
