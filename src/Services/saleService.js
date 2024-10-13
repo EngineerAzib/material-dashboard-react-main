@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { GetTotalDalySales,GetTotalWeeklySales,GetTotalMonthlySales,GetWeeklySale,GetDailySale,GetYearlySale } from "layouts/Api";
 
-const API_URL = 'https://localhost:7171';
+//const API_URL = 'https://localhost:7171';
 
 export const GetTotalDalySale = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetTotalDalySale`);
+        const response = await axios.get(GetTotalDalySales);
         return response.data;
     } catch (error) {
         console.error('Error fetching daily revenue:', error);
@@ -13,7 +14,7 @@ export const GetTotalDalySale = async () => {
 };
 export const GetTotalWeeklySale = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetTotalWeeklySale`);
+        const response = await axios.get(GetTotalWeeklySales);
         return response.data;
     } catch (error) {
         console.error('Error fetching GetTotalWeeklySale:', error);
@@ -22,7 +23,7 @@ export const GetTotalWeeklySale = async () => {
 };
 export const GetTotalMonthlySale = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetTotalMonthlySale`);
+        const response = await axios.get(GetTotalMonthlySales);
         return response.data;
     } catch (error) {
         console.error('Error fetching daily revenue:', error);
@@ -31,7 +32,7 @@ export const GetTotalMonthlySale = async () => {
 };
 export const GetTotalYearlySale = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetTotalYearlySale`);
+        const response = await axios.get(GetTotalYearlySales);
         return response.data;
     } catch (error) {
         console.error('Error fetching daily revenue:', error);
@@ -40,7 +41,7 @@ export const GetTotalYearlySale = async () => {
 };
 export const GetWeeklySales = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetWeeklySales`);
+        const response = await axios.get(GetWeeklySale);
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly sales data:', error);
@@ -49,7 +50,7 @@ export const GetWeeklySales = async () => {
 };
 export const GetDailySales = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetDailySales`);
+        const response = await axios.get(GetDailySale);
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly sales data:', error);
@@ -58,7 +59,7 @@ export const GetDailySales = async () => {
 };
 export const GetYearlySales = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetYearlySales`);
+        const response = await axios.get(GetYearlySale);
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly sales data:', error);

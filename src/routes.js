@@ -10,10 +10,10 @@ import Billing from "layouts/billing";
 import PaymentManagement from "layouts/Payment/payment";
 import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
 import PurchaseProduct from "layouts/PurchasProduct/PurchaseProduct";
-
+import Outlet from "layouts/Outlets/Outlets";
 import SalesDashboard from "layouts/SalesDashboard/SalesDashboard";
-
 import SaleHistory from "layouts/SaleHistory/SaleHistory";
+import UserCompany from "layouts/UserCompany/UserCompany";
 
 import Expense from "layouts/expense/expense";
 import RTL from "layouts/rtl";
@@ -76,6 +76,24 @@ const routes = [
     icon: <CategoryIcon fontSize="small" />,
     route: "/categoryproduct",
     component: isAuthenticated() ? <CategoryProduct /> : <Navigate to="/authentication/sign-in" />,
+  },
+
+  {
+    type: "collapse",
+    name: "Outlets",
+    key: "Outlets",
+    icon: <CategoryIcon fontSize="small" />,
+    route: "/Outlets",
+    component: isAuthenticated() ? <Outlet /> : <Navigate to="/authentication/sign-in" />,
+  },
+
+  {
+    type: "collapse",
+    name: "User Company",
+    key: "User Company",
+    icon: <CategoryIcon fontSize="small" />,
+    route: "/UserCompany",
+    component: isAuthenticated() ? <UserCompany /> : <Navigate to="/authentication/sign-in" />,
   },
   {
     type: "collapse",

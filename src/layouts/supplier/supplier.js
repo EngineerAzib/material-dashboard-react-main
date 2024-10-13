@@ -15,6 +15,7 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getSupplier,AddSupplier,UpdateSupplier,DeleteSupplier } from "layouts/Api"; // Adjust the path if necessary
 
 const Supplier = () => {
   const [rows, setRows] = useState([]);
@@ -41,7 +42,7 @@ const Supplier = () => {
 
   const fetchSupplierTable = async () => {
     try {
-      const response = await axios.get("https://localhost:7171/api/Supplier/GetSupplier");
+      const response = await axios.get(getSupplier);
       console.log(response);
       const fetchedData = response.data || [];
       setRows(formatRows(fetchedData));
@@ -85,7 +86,7 @@ const Supplier = () => {
   const handleSaveClick = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`https://localhost:7171/api/Supplier/UpdateSupplier?Id=${editingId}`, {
+      await axios.put(`${UpdateSupplier}?Id=${editingId}`, {
         id: editingId,
         supplierName: supplierDetails.name,
         phonenumber: supplierDetails.phone,
@@ -115,7 +116,7 @@ const Supplier = () => {
 
   const handleDeleteClick = async (id) => {
     try {
-      await axios.delete(`https://localhost:7171/api/Supplier/DeleteSupplier?id=${id}`);
+      await axios.delete(`${DeleteSupplier}?Id=${id}`);
       setRows((prevRows) => prevRows.filter((row) => row.id !== id));
       toast.success("Supplier deleted successfully!");
     } catch (error) {
@@ -127,7 +128,7 @@ const Supplier = () => {
   const handleAddSupplier = async (event) => {
     event.preventDefault();
     try {
-      await axios.post("https://localhost:7171/api/Supplier/AddSupplier", {
+      await axios.post(AddSupplier, {
         supplierName: newSupplier.name,
         phonenumber: newSupplier.phone,
         address: newSupplier.address,

@@ -9,7 +9,7 @@ import { Height } from "@mui/icons-material";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useNavigate } from 'react-router-dom';
 import zIndex from "@mui/material/styles/zIndex";
-
+import { GetBilling,AddBilling,GetProduct,GetPayment,GetAvaliableQuantity } from "layouts/Api";
 const Billing = () => {
   const navigate = useNavigate(); // Initialize navigate
   const [products, setProducts] = useState([]);
@@ -46,7 +46,7 @@ const Billing = () => {
     setSearchTerm(value);
     if (value.length > 0) {
   try {
-    const response = await axios.get(`https://localhost:7171/GetProduct?query=${value}`);
+    const response = await axios.get(`${GetProduct}?query=${value}`);
     
     const filteredResults = response.data.filter(product => {
       const name = product.name || ''; // Safely handle null or undefined
@@ -149,7 +149,7 @@ const handleQuantityChange = (index, value) => {
     setEditableTotalAmount(total);
 
     try {
-      const response = await axios.get("https://localhost:7171/api/Payment/Getpayment");
+      const response = await axios.get(GetPayment);
       const paymentMethods = response.data;
       setPaymentMethods(paymentMethods);
     } catch (error) {
@@ -206,7 +206,7 @@ const handleQuantityChange = (index, value) => {
     // Validate product quantities
     try {
       // Fetch available quantities from the backend
-      const response = await axios.get("https://localhost:7171/api/Billing/GetAvailableQuantities");
+      const response = await axios.get(GetAvaliableQuantity);
       const availableQuantities = response.data;
   
       // Check if any product quantity exceeds available stock
@@ -237,8 +237,8 @@ const handleQuantityChange = (index, value) => {
           PaymentId: methodId,
         }))
       );
-  
-      await axios.post("https://localhost:7171/api/Billing/AddBilling", payload);
+      
+      await axios.post(AddBilling, payload);
   
       toast.success("Billing information saved successfully!",{containerId:"Billing"});
       setShowOptionsModal(true);
@@ -259,7 +259,7 @@ const handleQuantityChange = (index, value) => {
     }
   }; 
 const handleGeneratePDF = async () => {
-  const response = await fetch('https://localhost:7171/api/Billing/GetBilling');
+  const response = await fetch(GetBilling);
   const billingDataArray = await response.json();
 
   console.log("Billing Data Array:", billingDataArray);
@@ -383,7 +383,7 @@ const handleGeneratePDF = async () => {
 
   useEffect(() => {
     // Fetch the last billing data from the API
-    fetch("https://localhost:7171/api/Billing/GetBilling")
+    fetch(GetBilling)
       .then(response => response.json())
       .then(data => {
         console.log('API Response:', data); // Check the API response in the console

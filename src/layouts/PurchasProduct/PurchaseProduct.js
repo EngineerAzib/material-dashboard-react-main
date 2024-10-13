@@ -48,9 +48,8 @@ const PurchaseOrder = () => {
       const [suppliersResponse, productsResponse] = await Promise.all([
         axios.get("https://localhost:7171/api/Supplier/GetSupplier"),
         axios.get("https://localhost:7171/GetProduct"),
-        
       ]);
-      console.log(productsResponse,"abf")
+  
       // Set suppliers and products after fetching
       setSuppliers(suppliersResponse.data || []);
       setProducts(productsResponse.data || []);
@@ -227,14 +226,6 @@ const PurchaseOrder = () => {
   ];
 
   const modalStyles = {
-    label: {
-      display: 'flex',
-      flexDirection: 'column',
-      flex: 1,
-      marginRight: '10px', /* Or any spacing you need */
-      fontSize:"11px"
-    },
-    
     button: {
       padding: "10px 20px",
       backgroundColor: "#344767",
@@ -360,156 +351,134 @@ const PurchaseOrder = () => {
       <Footer />
 
       {isModalOpen.add || isModalOpen.edit ? (
-  <div style={modalStyles.overlay}>
-    <div style={modalStyles.modal}>
-      <div style={modalStyles.header}>
-        <MDTypography variant="h5">
-          {isModalOpen.edit ? "Edit Order" : "Add New Order"}
-        </MDTypography>
-        <button style={modalStyles.closeButton} onClick={() => closeModal()}>
-          &times;
-        </button>
-      </div>
-      <form onSubmit={(e) => handleOrderSubmit(e, isModalOpen.edit)}>
-        <div style={modalStyles.gridContainer}>
-          <label style={modalStyles.label}>
-            Order Given Date
-            <MDInput
-              type="date"
-              name="oderGiveDate"
-              value={newOrder.oderGiveDate}
-              onChange={handleInputChange}
-              style={modalStyles.input}
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Order Receive Date
-            <MDInput
-              type="date"
-              name="oderReceiveDate"
-              value={newOrder.oderReceiveDate}
-              onChange={handleInputChange}
-              style={modalStyles.input}
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Product
-            <select
-              name="productId"
-              value={newOrder.productId}
-              onChange={handleInputChange}
-              style={modalStyles.select}
-            >
-              <option value="">Select Product</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label style={modalStyles.label}>
-            Supplier
-            <select
-              name="suplierId"
-              value={newOrder.suplierId}
-              onChange={handleInputChange}
-              style={modalStyles.select}
-            >
-              <option value="">Select Supplier</option>
-              {suppliers.map((supplier) => (
-                <option key={supplier.id} value={supplier.id}>
-                  {supplier.supplierName}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label style={modalStyles.label}>
-            Unit Price
-            <MDInput
-              type="number"
-              name="unitPrice"
-              value={newOrder.unitPrice}
-              onChange={handleInputChange}
-              placeholder="Unit Price"
-              style={modalStyles.input}
-              min="0"
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Total Price
-            <MDInput
-              type="number"
-              name="totalPrice"
-              value={newOrder.totalPrice}
-              onChange={handleInputChange}
-              placeholder="Total Price"
-              style={modalStyles.input}
-              min="0"
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Order Quantity
-            <MDInput
-              type="number"
-              name="orderQuantity"
-              value={newOrder.orderQuantity}
-              onChange={handleInputChange}
-              placeholder="Order Quantity"
-              style={modalStyles.input}
-              min="0"
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Receive Quantity
-            <MDInput
-              type="number"
-              name="receiveQuantity"
-              value={newOrder.receiveQuantity}
-              onChange={handleInputChange}
-              placeholder="Receive Quantity"
-              style={modalStyles.input}
-              min="0"
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Total Payment
-            <MDInput
-              type="number"
-              name="totalPayment"
-              value={newOrder.totalPayment}
-              onChange={handleInputChange}
-              placeholder="Total Payment"
-              style={modalStyles.input}
-              min="0"
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Paid Payment
-            <MDInput
-              type="number"
-              name="paidPayment"
-              value={newOrder.paidPayment}
-              onChange={handleInputChange}
-              placeholder="Paid Payment"
-              style={modalStyles.input}
-              min="0"
-            />
-          </label>
+        <div style={modalStyles.overlay}>
+          <div style={modalStyles.modal}>
+            <div style={modalStyles.header}>
+              <MDTypography variant="h5">
+                {isModalOpen.edit ? "Edit Order" : "Add New Order"}
+              </MDTypography>
+              <button
+                style={modalStyles.closeButton}
+                onClick={() => closeModal()}
+              >
+                &times;
+              </button>
+            </div>
+            <form onSubmit={(e) => handleOrderSubmit(e, isModalOpen.edit)}>
+              <div style={modalStyles.gridContainer}>
+                <MDInput
+                  type="date"
+                  name="oderGiveDate"
+                  value={newOrder.oderGiveDate}
+                  onChange={handleInputChange}
+                  placeholder="Order Given Date"
+                  style={modalStyles.input}
+                />
+                <MDInput
+                  type="date"
+                  name="oderReceiveDate"
+                  value={newOrder.oderReceiveDate}
+                  onChange={handleInputChange}
+                  placeholder="Order Receive Date"
+                  style={modalStyles.input}
+                />
+                <select
+                  name="productId"
+                  value={newOrder.productId}
+                  onChange={handleInputChange}
+                  style={modalStyles.select}
+                >
+                  <option value="">Select Product</option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  name="suplierId"
+                  value={newOrder.suplierId}
+                  onChange={handleInputChange}
+                  style={modalStyles.select}
+                >
+                  <option value="">Select Supplier</option>
+                  {suppliers.map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.supplierName}
+                    </option>
+                  ))}
+                </select>
+                <MDInput
+                  type="number"
+                  name="unitPrice"
+                  value={newOrder.unitPrice}
+                  onChange={handleInputChange}
+                  placeholder="Unit Price"
+                  style={modalStyles.input}
+                  min="0"
+                />
+                <MDInput
+                  type="number"
+                  name="totalPrice"
+                  value={newOrder.totalPrice}
+                  onChange={handleInputChange}
+                  placeholder="Total Price"
+                  style={modalStyles.input}
+                  min="0"
+                />
+                <MDInput
+                  type="number"
+                  name="orderQuantity"
+                  value={newOrder.orderQuantity}
+                  onChange={handleInputChange}
+                  placeholder="Order Quantity"
+                  style={modalStyles.input}
+                  min="0"
+                />
+                <MDInput
+                  type="number"
+                  name="receiveQuantity"
+                  value={newOrder.receiveQuantity}
+                  onChange={handleInputChange}
+                  placeholder="Receive Quantity"
+                  style={modalStyles.input}
+                  min="0"
+                />
+                <MDInput
+                  type="number"
+                  name="totalPayment"
+                  value={newOrder.totalPayment}
+                  onChange={handleInputChange}
+                  placeholder="Total Payment"
+                  style={modalStyles.input}
+                  min="0"
+                />
+                <MDInput
+                  type="number"
+                  name="paidPayment"
+                  value={newOrder.paidPayment}
+                  onChange={handleInputChange}
+                  placeholder="Paid Payment"
+                  style={modalStyles.input}
+                  min="0"
+                />
+              </div>
+              <div style={modalStyles.footer}>
+                <button
+                  type="button"
+                  style={modalStyles.cancelButton}
+                  onClick={closeModal}
+                >
+                  Cancel
+                </button>
+                <button type="submit" style={modalStyles.button}>
+                  {isModalOpen.edit ? "Update" : "Save"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div style={modalStyles.footer}>
-          <button type="button" style={modalStyles.cancelButton} onClick={closeModal}>
-            Cancel
-          </button>
-          <button type="submit" style={modalStyles.button}>
-            {isModalOpen.edit ? "Update" : "Save"}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-) : null}
-
+      ) : null}
       <ToastContainer />
     </DashboardLayout>
   );

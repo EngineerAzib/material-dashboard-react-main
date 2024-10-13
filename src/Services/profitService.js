@@ -1,10 +1,10 @@
 import axios from 'axios';
-
-const API_URL = 'https://localhost:7171';
+import { DayProfit,GetWeeklyProfits,MonthProfit,YearProfit,GetDailyProfitsData,GetWeeklyProfitsData,GetYearlyProfitsData } from "layouts/Api";
+//const API_URL = 'https://localhost:7171';
 
 export const GetDayProfit = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetDayProfit`);
+        const response = await axios.get(DayProfit);
         return response.data;
     } catch (error) {
         console.error('Error fetching daily Profit:', error);
@@ -13,7 +13,7 @@ export const GetDayProfit = async () => {
 };
 export const GetWeeklyProfit = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetWeeklyProfit`);
+        const response = await axios.get(GetWeeklyProfits);
         return response.data;
     } catch (error) {
         console.error('Error fetching Weekly Profit:', error);
@@ -22,7 +22,7 @@ export const GetWeeklyProfit = async () => {
 };
 export const GetMonthProfit = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetMonthProfit`);
+        const response = await axios.get(MonthProfit);
         return response.data;
     } catch (error) {
         console.error('Error fetching Month Profit:', error);
@@ -31,7 +31,7 @@ export const GetMonthProfit = async () => {
 };
 export const GetYearProfit = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetYearProfit`);
+        const response = await axios.get(YearProfit);
         return response.data;
     } catch (error) {
         console.error('Error fetching Year Profit:', error);
@@ -40,7 +40,7 @@ export const GetYearProfit = async () => {
 };
 export const GetDailyProfitData = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetDailyProfitData`);
+        const response = await axios.get(GetDailyProfitsData);
         return response.data;
     } catch (error) {
         console.error('Error fetching Daily Profit:', error);
@@ -49,7 +49,7 @@ export const GetDailyProfitData = async () => {
 };
 export const GetWeeklyProfitData = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetWeeklyProfitData`);
+        const response = await axios.get(GetWeeklyProfitsData);
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly profit data:', error);
@@ -58,7 +58,7 @@ export const GetWeeklyProfitData = async () => {
 };
 export const GetYearlyProfitData = async () => {
     try {
-        const response = await axios.get(`${API_URL}/GetYearlyProfitData`);
+        const response = await axios.get(GetYearlyProfitsData);
         return response.data;
     } catch (error) {
         console.error('Error fetching Yearly data:', error);

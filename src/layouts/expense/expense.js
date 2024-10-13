@@ -15,6 +15,7 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { GetExpense,AddExpense,UpdateExpense,DeleteExpense } from "layouts/Api"; // Adjust the path if necessary
 
 // Modal Component for Add/Edit Expense
 const ExpenseModal = ({ isOpen, onClose, onSubmit, expenseData, setExpenseData, title }) => {
@@ -96,7 +97,7 @@ const Expense = () => {
 
   const fetchExpenses = async () => {
     try {
-      const response = await axios.get("https://localhost:7171/api/Expense/GetExpense");
+      const response = await axios.get(GetExpense);
       const fetchedData = response.data || [];
       setRows(formatRows(fetchedData));
     } catch (error) {
@@ -138,7 +139,7 @@ const Expense = () => {
   const handleSaveClick = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`https://localhost:7171/api/Expense/UpdatExpense?id=${editingExpense.id}`, editingExpense);
+      await axios.put(`${UpdateExpense}?id=${editingExpense.id}`, editingExpense);
       setRows((prevRows) =>
         prevRows.map((row) =>
           row.id === editingExpense.id
@@ -156,7 +157,7 @@ const Expense = () => {
 
   const handleDeleteClick = async (id) => {
     try {
-      await axios.delete(`https://localhost:7171/api/Expense/DeleteExpense?id=${id}`);
+      await axios.delete(`${DeleteExpense}?Id=${id}`);
       setRows((prevRows) => prevRows.filter((row) => row.id !== id));
       toast.success("Expense deleted successfully!", { autoClose: 2000, containerId: "expenses" });
     } catch (error) {
@@ -168,7 +169,7 @@ const Expense = () => {
   const handleAddExpense = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("https://localhost:7171/api/Expense/AddExpense", newExpense);
+      await axios.post(AddExpense, newExpense);
       toast.success("Expense added successfully!", { autoClose: 2000, containerId: "expenses" });
       fetchExpenses();
       setNewExpense({ name: "", amount: 0, startDate: "", endDate: "" });

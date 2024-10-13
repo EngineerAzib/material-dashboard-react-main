@@ -15,7 +15,7 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { GetCatagory,AddCategory,UpdateCatagory ,DeleteCatagory } from "layouts/Api";
 const CategoryProduct = () => {
   const [rows, setRows] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -31,7 +31,7 @@ const CategoryProduct = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("https://localhost:7171/GetCategory");
+      const response = await axios.get(GetCatagory);
       const fetchedData = response.data || [];
       setRows(formatRows(fetchedData));
     } catch (error) {
@@ -65,7 +65,7 @@ const CategoryProduct = () => {
 
   const handleSaveClick = async () => {
     try {
-      await axios.put(`https://localhost:7171/UpdateCategory?Id=${editingId}&CatName=${editingName}`, {
+      await axios.put(`${UpdateCatagory}?id=${editingId}&CatName=${editingName}`,{
         id: editingId,
         catName: editingName,
       });
@@ -86,7 +86,7 @@ const CategoryProduct = () => {
 
   const handleDeleteClick = async (id) => {
     try {
-      await axios.delete(`https://localhost:7171/DeleteCategory?id=${id}`);
+      await axios.delete(`${DeleteCatagory}?Id=${id}`);
       setRows((prevRows) => prevRows.filter((row) => row.id !== id));
       toast.success("Category deleted successfully!");
     } catch (error) {
@@ -98,7 +98,8 @@ const CategoryProduct = () => {
   const handleAddCategory = async (event) => {
     event.preventDefault();
     try {
-      await axios.post(`https://localhost:7171/AddCategory?catName=${encodeURIComponent(catName)}`);
+      //await axios.post(AddCategory, { catName });
+    await axios.post(`${AddCategory}?catName=${encodeURIComponent(catName)}`);
       toast.success("Category added successfully!");
       setCatName("");
       fetchCategories();

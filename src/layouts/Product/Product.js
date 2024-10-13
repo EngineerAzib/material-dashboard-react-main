@@ -15,7 +15,7 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { GetProduct,AddProduct,UpdateProduct ,DeleteProduct,getSupplier,GetCatagory } from "layouts/Api";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -41,9 +41,9 @@ const Product = () => {
   const fetchInitialData = async () => {
     try {
       const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
-        axios.get('https://localhost:7171/api/Supplier/GetSupplier'),
-        axios.get('https://localhost:7171/GetCategory'),
-        axios.get('https://localhost:7171/GetProduct'),
+        axios.get(getSupplier),
+        axios.get(GetCatagory),
+        axios.get(GetProduct),
       ]);
       setSuppliers(suppliersResponse.data || []);
       setCategories(categoriesResponse.data || []);
@@ -114,7 +114,7 @@ const Product = () => {
     // if (newProduct.image) formData.append("imageFile", newProduct.image);
 
     try {
-      await axios.put("https://localhost:7171/UpdateProduct", formData);
+      await axios.put(UpdateProduct, formData);
       fetchInitialData();
       closeModal();
       toast.success("Product updated successfully!");
@@ -136,7 +136,7 @@ const Product = () => {
     // if (newProduct.image) formData.append("imageFile", newProduct.image);
 
     try {
-      await axios.post('https://localhost:7171/AddProduct', formData);
+      await axios.post(AddProduct, formData);
       fetchInitialData();
       closeModal();
       toast.success("Product added successfully!");
@@ -147,7 +147,7 @@ const Product = () => {
 
   const handleDeleteProduct = async (id) => {
     try {
-      await axios.delete(`https://localhost:7171/DeleteProduct?id=${id}`);
+      await axios.delete(`${DeleteProduct}?Id=${id}`);
       setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
       toast.success("Product deleted successfully!");
     } catch (error) {
