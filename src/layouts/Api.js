@@ -38,6 +38,10 @@ export const DeleteUserCompany=`${baseUrl}/api/Company/DeleteCompany`;
 //Outlets
 export const GetOutLets=`${baseUrl}/api/OutLets/GetOutLets`;
 export const AddOutLets=`${baseUrl}/api/OutLets/AddOutLets`;
+export const UpdateOutLets=`${baseUrl}/api/OutLets/UpdateOutLets`;
+export const DeleteOutLets=`${baseUrl}/api/OutLets/deleteOutLets`;
+//Company
+export const GetCompany=`${baseUrl}/api/Company/GetCompany`;
 //Dashboard
 export const GetDayProfit=`${baseUrl}/GetDayProfitComparison`;
 export const GetWeekProfitProfit=`${baseUrl}/GetWeekProfitComparison`;

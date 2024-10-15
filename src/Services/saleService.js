@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GetTotalDalySales,GetTotalWeeklySales,GetTotalMonthlySales,GetWeeklySale,GetDailySale,GetYearlySale } from "layouts/Api";
+import { GetTotalDalySales,GetTotalWeeklySales,GetTotalMonthlySales,GetWeeklySale,GetDailySale,GetYearlySale,GetTotalYearlySales } from "layouts/Api";
 
 //const API_URL = 'https://localhost:7171';
 
