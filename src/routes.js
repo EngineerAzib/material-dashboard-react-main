@@ -10,7 +10,7 @@ import Billing from "layouts/billing";
 import PaymentManagement from "layouts/Payment/payment";
 import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
 import PurchaseProduct from "layouts/PurchasProduct/PurchaseProduct";
-import Outlet from "layouts/Outlets/Outlets";
+import Outlets from "layouts/Outlets/Outlets";
 import SalesDashboard from "layouts/SalesDashboard/SalesDashboard";
 import SaleHistory from "layouts/SaleHistory/SaleHistory";
 import UserCompany from "layouts/UserCompany/UserCompany";
@@ -84,7 +84,7 @@ const routes = [
     key: "Outlets",
     icon: <CategoryIcon fontSize="small" />,
     route: "/Outlets",
-    component: isAuthenticated() ? <Outlet /> : <Navigate to="/authentication/sign-in" />,
+    component: isAuthenticated() ? <Outlets /> : <Navigate to="/authentication/sign-in" />,
   },
 
   {
