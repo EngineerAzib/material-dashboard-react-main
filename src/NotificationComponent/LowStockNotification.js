@@ -47,22 +47,12 @@ const LowStockNotification = () => {
     // Handle receiving messages
     const handleMessage = (message) => {
         console.log("Received message:", message);
-        toast.info(message, { autoClose: false, closeOnClick: true }); // No timer, only closes on click
+        toast.info(message, { autoClose: false, closeOnClick: true ,  containerId: "noti" }); // No timer, only closes on click
     };
 
     return (
         <div>
-            <ToastContainer 
-                position="top-right" 
-                autoClose={false} // No auto close
-                hideProgressBar={false} 
-                newestOnTop={false} 
-                closeOnClick 
-                rtl={false} 
-                pauseOnFocusLoss 
-                draggable 
-                pauseOnHover 
-            />
+             <ToastContainer containerId="noti" position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         </div>
     );
 };

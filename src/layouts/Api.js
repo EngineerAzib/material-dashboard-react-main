@@ -17,7 +17,7 @@ export const AddProduct = `${baseUrl}/AddProduct`;
  export const UpdateProduct = `${baseUrl}/UpdateProduct`;
 export const DeleteProduct = `${baseUrl}/DeleteProduct`;
 // Catagory
-export const GetCatagory=`${baseUrl}/GetCategory`;
+export const GetCatagory=`${baseUrl}/api/Category/GetCategory`;
 export const AddCategory = `${baseUrl}/AddCategory`;
  export const UpdateCatagory = `${baseUrl}/UpdateCategory`;
 export const DeleteCatagory = `${baseUrl}/DeleteCategory`;

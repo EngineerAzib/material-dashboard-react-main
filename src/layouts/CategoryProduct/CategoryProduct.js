@@ -29,9 +29,24 @@ const CategoryProduct = () => {
     fetchCategories();
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get(GetCatagory);
+ const fetchCategories = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    console.log(token, "token"); // Check the token value
+    const userId = localStorage.getItem("userId");
+    console.log(userId, "userId"); // Check the userId value
+
+    if (!token || !userId) {
+      throw new Error("User is not authenticated or userId is missing");
+    }
+
+    const response = await axios.get(GetCatagory, {
+      headers: {
+       
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
       const fetchedData = response.data || [];
       setRows(formatRows(fetchedData));
     } catch (error) {

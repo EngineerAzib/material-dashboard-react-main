@@ -129,17 +129,13 @@ const UserCompany = () => {
     e.preventDefault();
     try {
       const response = await axios.post("https://localhost:7171/api/Auth", newUserCompany);
-      addNewRow(response.data);
+      setRows((prevRows) => [...prevRows, formatNewRow(response.data)]);
+      handleSuccess("User Company added successfully!");
       resetNewUserCompany();
       closeAddModal();
-      handleSuccess("User Company added successfully!");
     } catch (error) {
       handleError("Failed to add user company.");
     }
-  };
-
-  const addNewRow = (addedCompany) => {
-    setRows((prevRows) => [...prevRows, formatNewRow(addedCompany)]);
   };
 
   const formatNewRow = (item) => ({
@@ -231,35 +227,35 @@ const UserCompany = () => {
                     ],
                     rows: filteredRows,
                   }}
-                  isSorted={false}
                 />
               </MDBox>
             </Card>
           </Grid>
         </Grid>
+        <UserCompanyModal
+          isOpen={isAddModalOpen}
+          onClose={closeAddModal}
+          onSubmit={handleAddUserCompany}
+          userCompanyData={newUserCompany}
+          setUserCompanyData={setNewUserCompany}
+          title="Add New User Company"
+        />
+        <UserCompanyModal
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+          onSubmit={handleSaveClick}
+          userCompanyData={editingUserCompany}
+          setUserCompanyData={setEditingUserCompany}
+          title="Edit User Company"
+        />
+        <ToastContainer containerId="userCompanies" />
       </MDBox>
-      <UserCompanyModal
-        isOpen={isAddModalOpen}
-        onClose={closeAddModal}
-        onSubmit={handleAddUserCompany}
-        userCompanyData={newUserCompany}
-        setUserCompanyData={setNewUserCompany}
-        title="Add User Company"
-      />
-      <UserCompanyModal
-        isOpen={isEditModalOpen}
-        onClose={closeEditModal}
-        onSubmit={handleSaveClick}
-        userCompanyData={editingUserCompany}
-        setUserCompanyData={setEditingUserCompany}
-        title="Edit User Company"
-      />
       <Footer />
-      <ToastContainer containerId="userCompanies" position="top-center" />
     </DashboardLayout>
   );
 };
 
+// Helper function to initialize a new user company object
 const initialUserCompanyData = () => ({
   userName: "",
   email: "",
@@ -270,16 +266,18 @@ const initialUserCompanyData = () => ({
   ownerPhoneNumber: "",
 });
 
-const searchStyle = { width: "50%", marginRight: "10px" };
+const searchStyle = {
+  marginBottom: "10px",
+  marginRight: "10px",
+};
+
 const addButtonStyle = {
-  padding: "10px",
-  backgroundColor: "#0d6efd",
+  backgroundColor: "#1A73E8",
+  color: "#FFF",
+  padding: "8px 16px",
   border: "none",
-  borderRadius: "5px",
-  color: "white",
+  borderRadius: "4px",
   cursor: "pointer",
 };
 
 export default UserCompany;
-
-

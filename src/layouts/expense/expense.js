@@ -110,7 +110,7 @@ const Expense = () => {
     return data.map((item) => ({
       id: item.id,
       name: item.name,
-      amount: item.amount.toFixed(2),
+      amount: typeof item.amount === "number" ? item.amount.toFixed(2) : item.amount, // Ensure amount is a number
       startDate: item.startDate ? item.startDate.substring(0, 10) : "",
       endDate: item.endDate ? item.endDate.substring(0, 10) : "",
       action: (
@@ -125,6 +125,7 @@ const Expense = () => {
       ),
     }));
   };
+  
 
   const handleEditClick = (item) => {
     const formattedItem = {
@@ -138,12 +139,19 @@ const Expense = () => {
 
   const handleSaveClick = async (e) => {
     e.preventDefault();
+  
+    // Parse amount to number if it's a valid number
+    const updatedExpense = {
+      ...editingExpense,
+      amount: parseFloat(editingExpense.amount) || 0, // Ensures amount is a number
+    };
+  
     try {
-      await axios.put(`${UpdateExpense}?id=${editingExpense.id}`, editingExpense);
+      await axios.put(`${UpdateExpense}?id=${updatedExpense.id}`, updatedExpense);
       setRows((prevRows) =>
         prevRows.map((row) =>
-          row.id === editingExpense.id
-            ? { ...row, ...editingExpense, amount: editingExpense.amount.toFixed(2) }
+          row.id === updatedExpense.id
+            ? { ...row, ...updatedExpense, amount: updatedExpense.amount.toFixed(2) }
             : row
         )
       );
@@ -154,7 +162,7 @@ const Expense = () => {
       toast.error("Failed to update expense.", { autoClose: 2000, containerId: "expenses" });
     }
   };
-
+  
   const handleDeleteClick = async (id) => {
     try {
       await axios.delete(`${DeleteExpense}?Id=${id}`);
