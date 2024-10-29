@@ -15,7 +15,8 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import Select from "react-select";  // Import react-select for dropdown
+ 
 const StaffTable = () => {
   const [rows, setRows] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -31,10 +32,19 @@ const StaffTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedOutlet, setSelectedOutlet] = useState(null); // Store selected outlet in Add form
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [editingEmail, setEditingEmail] = useState("");
+  const [editingPassword, setEditingPassword] = useState("");
+const [outlets, setOutlets] = useState([]); // State variable for outlets
+const [selectedEditOutlet, setSelectedEditOutlet] = useState(null); // Declare the state variable
 
   useEffect(() => {
     fetchStaffTable();
+    fetchOutlets(); // Fetch outlets data
   }, []);
+
 
   const fetchStaffTable = async () => {
     try {
@@ -44,6 +54,26 @@ const StaffTable = () => {
     } catch (error) {
       console.error("Error fetching staff data:", error);
       toast.error("Failed to fetch staff data.");
+    }
+  };
+  const fetchOutlets = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const mappedOutlets = response.data.map(outlet => ({
+        value: outlet.id,
+        label: outlet.outlet_Name
+      }));
+
+      setOutlets(mappedOutlets);
+    } catch (error) {
+      console.error("Error fetching outlet data:", error);
+      toast.error("Failed to fetch outlets.");
     }
   };
 
@@ -56,9 +86,11 @@ const StaffTable = () => {
       niC_number: item.niC_number,
       address: item.address,
       salary: item.salary,
+      email: item.email,
+      password: item.password,
       action: (
         <>
-          <IconButton onClick={() => handleEditClick(item.id, item.name, item.phone, item.role, item.niC_number, item.address, item.salary)}>
+         <IconButton onClick={() => handleEditClick(item)}>
             <EditIcon />
           </IconButton>
           <IconButton onClick={() => handleDeleteClick(item.id)}>
@@ -68,57 +100,78 @@ const StaffTable = () => {
       ),
     }));
   };
-
-  const handleEditClick = (id, currentName, currentPhone, currentRole, currentNIC, currentAddress, currentSalary) => {
-    setEditingId(id);
-    setEditingName(currentName);
-    setEditingPhone(currentPhone);
-    setEditingRole(currentRole);
-    setNIC(currentNIC);
-    setAddress(currentAddress);
-    setSalary(currentSalary);
+  const handleEditClick = (item) => {
+    setEditingId(item.id);
+    setEditingName(item.name);
+    setEditingPhone(item.phone);
+    setEditingRole(item.role);
+    setNIC(item.niC_number);
+    setAddress(item.address);
+    setSalary(item.salary);
+    setEditingEmail(item.email);
+    setEditingPassword(item.password);
     setIsEditModalOpen(true);
   };
-  
-
-  const handleSaveClick = async () => {
-    try {
-      await axios.put(`https://localhost:7171/api/Staff/UpdateStaff?Id=${editingId}`, {
-        id: editingId,
-        name: editingName,
-        phone: editingPhone,
-        role: editingRole,
-        niC_number: newNIC,
-        address: newAddress,
-        salary: newSalary,
-      });
-      setRows((prevRows) =>
-        prevRows.map((row) =>
-          row.id === editingId ? {
-            ...row,
-            name: editingName,
-            phone: editingPhone,
-            role: editingRole,
-            niC_number: newNIC,
-            address: newAddress,
-            salary: newSalary,
-          } : row
-        )
-      );
-      setEditingId(null);
+  const handleCancelEdit = () => {
+    setEditingId(null);
     setEditingName("");
     setEditingPhone("");
     setEditingRole("");
     setNIC("");
     setAddress("");
     setSalary("");
+    setEditingEmail("");
+    setEditingPassword("");
     setIsEditModalOpen(false);
-      toast.success("Staff updated successfully!");
-    } catch (error) {
-      console.error("Error updating staff:", error);
-      toast.error("Failed to update staff.");
-    }
   };
+
+const handleSaveClick = async () => {
+  try {
+    await axios.put(`https://localhost:7171/api/Staff/UpdateStaff?Id=${editingId}`, {
+      id: editingId,
+      name: editingName,
+      phone: editingPhone,
+      role: editingRole,
+      niC_number: newNIC,
+      address: newAddress,
+      salary: newSalary,
+      email: newEmail, // Include email
+      password: editingPassword, // Include password
+      outlet_Id: selectedEditOutlet?.value,
+    });
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === editingId ? {
+          ...row,
+          name: editingName,
+          phone: editingPhone,
+          role: editingRole,
+          niC_number: newNIC,
+          address: newAddress,
+          salary: newSalary,
+          email: editingEmail,        // Update email in row
+          password: editingPassword,  // Update password in row
+        } : row
+      )
+    );
+    closeModal();
+    // Clear fields and close modal
+    setEditingId(null);
+    setEditingName("");
+    setEditingPhone("");
+    setEditingRole("");
+    setNIC("");
+    setAddress("");
+    setSalary("");
+    setEditingEmail("");
+    setEditingPassword("");
+    setIsEditModalOpen(false);
+    toast.success("Staff updated successfully!");
+  } catch (error) {
+    console.error("Error updating staff:", error);
+    toast.error("Failed to update staff.");
+  }
+};
 
   const handleDeleteClick = async (id) => {
     try {
@@ -141,22 +194,32 @@ const StaffTable = () => {
         niC_number: newNIC,
         address: newAddress,
         salary: newSalary,
+        email: newEmail,           // Add email
+        password: newPassword,     // Add password
+        outlet_Id: selectedOutlet?.value, // Include outlet_Id
+    
       });
       toast.success("Staff added successfully!");
+      closeModal();
       setNewName("");
       setNewPhone("");
       setNewRole("");
       setNIC("");
       setAddress("");
       setSalary("");
+      setNewEmail("");      // Reset email field
+      setNewPassword("");   // Reset password field
       setIsAddModalOpen(false);
-      fetchStaffTable();
     } catch (error) {
       console.error("Error adding staff:", error);
       toast.error("Failed to add staff.");
     }
   };
-
+  const closeModal = () => {
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(false);
+  };
+  
   const toggleAddModal = () => {
     setIsAddModalOpen(!isAddModalOpen);
   };
@@ -181,11 +244,18 @@ const StaffTable = () => {
               style={{ marginRight: '10px' }}
             />
             <MDInput
-              value={editingPhone}
-              onChange={(e) => setEditingPhone(e.target.value)}
+              value={editingEmail}
+              onChange={(e) => setEditingEmail(e.target.value)}
               fullWidth
               style={{ marginRight: '10px' }}
             />
+        <MDInput
+                      value={editingPhone}
+                      onChange={(e) => setEditingPhone(e.target.value)}
+                      fullWidth
+                      style={{ marginRight: '10px' }}
+                    />
+
             <MDInput
               value={editingRole}
               onChange={(e) => setEditingRole(e.target.value)}
@@ -212,6 +282,8 @@ const StaffTable = () => {
         niC_number={row.niC_number}
         address={row.address}
         salary={row.salary}
+        email={row.email}
+        
       />
     ),
     action: row.id === editingId ? (
@@ -224,74 +296,89 @@ const StaffTable = () => {
   }));
 
   const modalStyles = {
-    appContainer: { padding: '20px' },
-    openModalBtn: {
-      padding: '10px 20px',
-      backgroundColor: '#344767',
-      color: 'white',
-      border: 'none',
-      cursor: 'pointer',
-      borderRadius: '5px',
-      fontSize: '16px'
+    button: {
+      padding: "10px 20px",
+      backgroundColor: "#344767",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      borderRadius: "5px",
+      fontSize: "16px",
+      marginRight: "10px",
     },
-    modalOverlay: {
-      position: 'fixed',
+    overlay: {
+      position: "fixed",
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark overlay for background
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 8999, // Ensure it's on top of all other elements
+      overflowY: "hidden", // Disable scrolling when modal is open
     },
-    modalContainer: {
-      backgroundColor: 'white',
-      padding: '20px',
-      borderRadius: '10px',
-      width: '400px',
-      maxWidth: '80%',
-      position: 'relative'
+    modal: {
+      backgroundColor: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      width: "600px", // Increased width to 600px
+      maxWidth: "90%", // Max width of 90% for smaller screens
+      position: "relative",
+      zIndex: 1100, // Higher than the overlay to be safe
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Add subtle shadow for depth
     },
-    modalHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px'
+    gridContainer: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "15px",
     },
-    closeModalBtn: {
-      background: 'none',
-      border: 'none',
-      fontSize: '24px',
-      cursor: 'pointer'
+    header: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "20px",
     },
-    formGroup: { marginBottom: '15px' },
+    closeButton: {
+      background: "none",
+      border: "none",
+      fontSize: "24px",
+      cursor: "pointer",
+      color: "#344767",
+    },
     input: {
-      width: '100%',
-      padding: '10px',
-      border: '1px solid #ccc',
-      borderRadius: '5px'
+      padding: "10px",
+      border: "1px solid #ccc",
+      borderRadius: "5px",
+      marginBottom: "15px",
+      width: "100%", // Ensure all inputs take full width of grid column
+      height: "45px", // Equal height for all inputs
     },
-    submitBtn: {
-      width: '100%',
-      padding: '10px',
-      backgroundColor: '#344767',
-      color: 'white',
-      border: 'none',
-      cursor: 'pointer',
-      borderRadius: '5px',
-      fontSize: '16px'
+    select: {
+      padding: "10px",
+      border: "1px solid #ccc",
+      borderRadius: "5px",
+      marginBottom: "15px",
+      width: "100%", // Full width for selects
+      height: "45px", // Consistent height for select fields
     },
-    searchInput: {
-      width: '100%',
-      padding: '10px',
-      border: '1px solid #ccc',
-      borderRadius: '5px',
-      marginBottom: '20px'
-    }
+    footer: {
+      display: "flex",
+      justifyContent: "flex-end",
+      marginTop: "20px",
+    },
+    cancelButton: {
+      backgroundColor: "#ccc",
+      color: "black",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      padding: "10px 20px",
+      fontSize: "16px",
+      marginRight: "10px",
+    },
   };
-
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -303,7 +390,8 @@ const StaffTable = () => {
                 <MDTypography variant="h6" color="white">Staff Table</MDTypography>
               </MDBox>
               <MDBox pt={3} px={2}>
-                <button onClick={toggleAddModal} style={modalStyles.openModalBtn}>Add New Staff</button>
+                <button onClick={toggleAddModal} style={modalStyles.button}>Add New Staff</button>
+                
                 <MDInput
                   value={searchTerm}
                   onChange={handleSearch}
@@ -317,6 +405,7 @@ const StaffTable = () => {
                     { Header: "NIC Number", accessor: "niC_number" },
                     { Header: "Address", accessor: "address" },
                     { Header: "Salary", accessor: "salary" },
+                    { Header: "Email", accessor: "email" },
                     { Header: "Phone", accessor: "phone" },
                     { Header: "Role", accessor: "role" },
                     { Header: "Actions", accessor: "action" }
@@ -332,164 +421,200 @@ const StaffTable = () => {
       </MDBox>
       <Footer />
       {isAddModalOpen && (
-  <div style={modalStyles.modalOverlay}>
-    <div style={modalStyles.modalContainer}>
-      <div style={modalStyles.modalHeader}>
+  <div style={modalStyles.overlay}>
+    <div style={modalStyles.modal}>
+      <div style={modalStyles.header}>
         <h3>Add New Staff</h3>
-        <button onClick={toggleAddModal} style={modalStyles.closeModalBtn}>&times;</button>
+        <button onClick={toggleAddModal} style={modalStyles.closeButton}>&times;</button>
       </div>
       <form onSubmit={handleAddStaff}>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div style={{ flex: 1 }}>
-            <label>Name</label>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              style={modalStyles.input}
-              required
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label>Phone</label>
-            <input
-              type="text"
-              value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value)}
-              style={modalStyles.input}
-              required
-            />
-          </div>
-        </div>
+        <div style={modalStyles.gridContainer}>
+        <MDInput
+                  type="text"
+                  name="Name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="EnterName"
+                  style={modalStyles.input}
+            
+                />
+                 <MDInput
+                   type="email"
+                   value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="EnterEmail"
+                  style={modalStyles.input}
+            
+                />
+                 <MDInput
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="EnterPassword"
+                  style={modalStyles.input}
+            
+                />
+                 <MDInput
+                    type="number"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                  placeholder="EnterPhoneNumber"
+                  style={modalStyles.input}
+            
+                />
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-          <div style={{ flex: 1 }}>
-            <label>Role</label>
-            <input
-              type="text"
-              value={newRole}
-              onChange={(e) => setNewRole(e.target.value)}
-              style={modalStyles.input}
-              required
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label>NIC Number</label>
-            <input
-              type="text"
-              value={newNIC}
-              onChange={(e) => setNIC(e.target.value)}
-              style={modalStyles.input}
-              required
-            />
-          </div>
+            <Select
+                options={outlets}
+                value={selectedEditOutlet}
+                onChange={(selectedOption) => setSelectedEditOutlet(selectedOption)}
+                placeholder="Select Outlet"
+                required
+              />
+                <MDInput
+                     type="text"
+                     value={newRole}
+                     onChange={(e) => setNewRole(e.target.value)}
+                     required
+                  placeholder="EnterRole"
+                  style={modalStyles.input}
+            
+                />
+                 <MDInput
+                     type="text"
+                     value={newNIC}
+                     onChange={(e) => setNIC(e.target.value)}
+                     required
+                  placeholder="EnterNIC"
+                  style={modalStyles.input}
+            
+                />
+                 <MDInput
+                    type="text"
+                    value={newAddress}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                  placeholder="Address"
+                  style={modalStyles.input}
+            
+                />
+                  <MDInput
+                    type="number"
+                    value={newSalary}
+                    onChange={(e) => setSalary(e.target.value)}
+                    required
+                  placeholder="Salary"
+                  style={modalStyles.input}
+            
+                />
         </div>
+        <div style={modalStyles.footer}>
+                <button
+                  type="button"
+                  style={modalStyles.cancelButton}
+                  onClick={closeModal}
+                >
+                  Cancel
+                </button>
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-          <div style={{ flex: 1 }}>
-            <label>Address</label>
-            <input
-              type="text"
-              value={newAddress}
-              onChange={(e) => setAddress(e.target.value)}
-              style={modalStyles.input}
-              required
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label>Salary</label>
-            <input
-              type="number"
-              value={newSalary}
-              onChange={(e) => setSalary(e.target.value)}
-              style={modalStyles.input}
-              required
-            />
-          </div>
+        <button type="submit" style={modalStyles.button}>Save</button>
         </div>
-
-        <button type="submit" style={modalStyles.submitBtn}>Add Staff</button>
       </form>
     </div>
+   
   </div>
 )}
 
-     {isEditModalOpen && (
-  <div style={modalStyles.modalOverlay}>
-    <div style={modalStyles.modalContainer}>
-      <div style={modalStyles.modalHeader}>
+{isEditModalOpen && (
+  <div style={modalStyles.overlay}>
+    <div style={modalStyles.modal}>
+      
+      <div style={modalStyles.header}>
         <h3>Edit Staff</h3>
-        <button onClick={() => setIsEditModalOpen(false)} style={modalStyles.closeModalBtn}>&times;</button>
+        <button onClick={handleCancelEdit} style={modalStyles.closeButton}>&times;</button>
       </div>
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <div style={{ flex: 1 }}>
-          <label>Name</label>
-          <input
-            type="text"
-            value={editingName}
-            onChange={(e) => setEditingName(e.target.value)}
-            style={modalStyles.input}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label>Phone</label>
-          <input
-            type="text"
-            value={editingPhone}
-            onChange={(e) => setEditingPhone(e.target.value)}
-            style={modalStyles.input}
-          />
-        </div>
+      <div style={modalStyles.gridContainer}>
+        <MDInput
+          type="text"
+          name="Name"
+          value={editingName}
+          onChange={(e) => setEditingName(e.target.value)}
+          placeholder="Enter Name"
+          style={modalStyles.input}
+        />
+        <MDInput
+          type="email"
+          value={editingEmail}
+          onChange={(e) => setEditingEmail(e.target.value)}
+          placeholder="Enter Email"
+          style={modalStyles.input}
+        />
+        <MDInput
+          type="password"
+          value={editingPassword}
+          onChange={(e) => setEditingPassword(e.target.value)}
+          placeholder="Enter Password"
+          style={modalStyles.input}
+        />
+        <MDInput
+          type="number"
+          value={editingPhone}
+          onChange={(e) => setEditingPhone(e.target.value)}
+          placeholder="Enter Phone Number"
+          style={modalStyles.input}
+        />
+        <Select
+          options={outlets}
+          value={selectedEditOutlet}
+          onChange={(selectedOption) => setSelectedEditOutlet(selectedOption)}
+          placeholder="Select Outlet"
+          required
+        />
+        <MDInput
+          type="text"
+          value={editingRole}
+          onChange={(e) => setEditingRole(e.target.value)}
+          placeholder="Enter Role"
+          style={modalStyles.input}
+        />
+        <MDInput
+          type="text"
+          value={newNIC}
+          onChange={(e) => setNIC(e.target.value)}
+          placeholder="Enter NIC"
+          style={modalStyles.input}
+        />
+        <MDInput
+          type="text"
+          value={newAddress}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Address"
+          style={modalStyles.input}
+        />
+        <MDInput
+          type="number"
+          value={newSalary}
+          onChange={(e) => setSalary(e.target.value)}
+          placeholder="Salary"
+          style={modalStyles.input}
+        />
+         <div style={modalStyles.footer}>
+              <button
+                type="button"
+                style={modalStyles.cancelButton}
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </button>
+                
+        <button onClick={handleSaveClick} style={modalStyles.button}>Update</button>
       </div>
-
-      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-        <div style={{ flex: 1 }}>
-          <label>Role</label>
-          <input
-            type="text"
-            value={editingRole}
-            onChange={(e) => setEditingRole(e.target.value)}
-            style={modalStyles.input}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label>NIC Number</label>
-          <input
-            type="text"
-            value={newNIC}
-            onChange={(e) => setNIC(e.target.value)}
-            style={modalStyles.input}
-          />
-        </div>
       </div>
-
-      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-        <div style={{ flex: 1 }}>
-          <label>Address</label>
-          <input
-            type="text"
-            value={newAddress}
-            onChange={(e) => setAddress(e.target.value)}
-            style={modalStyles.input}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label>Salary</label>
-          <input
-            type="number"
-            value={newSalary}
-            onChange={(e) => setSalary(e.target.value)}
-            style={modalStyles.input}
-          />
-        </div>
-      </div>
-
-      <button onClick={handleSaveClick} style={modalStyles.submitBtn}>Save Changes</button>
     </div>
   </div>
 )}
-      <ToastContainer />
+<ToastContainer />
+
     </DashboardLayout>
   );
 };

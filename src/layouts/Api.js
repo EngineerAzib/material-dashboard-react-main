@@ -18,9 +18,9 @@ export const AddProduct = `${baseUrl}/AddProduct`;
 export const DeleteProduct = `${baseUrl}/DeleteProduct`;
 // Catagory
 export const GetCatagory=`${baseUrl}/api/Category/GetCategory`;
-export const AddCategory = `${baseUrl}/AddCategory`;
- export const UpdateCatagory = `${baseUrl}/UpdateCategory`;
-export const DeleteCatagory = `${baseUrl}/DeleteCategory`;
+export const AddCategory = `${baseUrl}/api/Category/AddCategory`;
+ export const UpdateCatagory = `${baseUrl}/api/Category/UpdateCategory`;
+export const DeleteCatagory = `${baseUrl}/api/Category/DeleteCategory`;
 // Billing
 export const GetBilling=`${baseUrl}/api/Billing/GetBilling`;
 export const AddBilling= `${baseUrl}/api/Billing/AddBilling`;

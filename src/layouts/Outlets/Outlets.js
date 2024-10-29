@@ -40,7 +40,18 @@ const Outlets = () => {
   // Fetch outlets
   const fetchOutlets = async () => {
     try {
-      const response = await axios.get(GetOutLets);
+      const token = localStorage.getItem("accessToken");
+      console.log(token, "token"); // Check the token value
+      const userId = localStorage.getItem("userId");
+      console.log(userId, "userId"); // Check the userId value
+      if (!token || !userId) {
+        throw new Error("User is not authenticated or userId is missing");
+      }
+    const response = await axios.get(GetOutLets,{
+       headers: {
+         
+        'Authorization': `Bearer ${token}`
+    }});
       setOutlets(response.data || []);
     } catch (error) {
       toast.error("Failed to fetch outlets.");

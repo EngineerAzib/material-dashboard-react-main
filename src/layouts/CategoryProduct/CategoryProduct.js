@@ -6,7 +6,6 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import IconButton from "@mui/material/IconButton";
-import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -14,38 +13,35 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import { ToastContainer, toast } from 'react-toastify';
+import Select from 'react-select';
 import 'react-toastify/dist/ReactToastify.css';
-import { GetCatagory,AddCategory,UpdateCatagory ,DeleteCatagory } from "layouts/Api";
+import { GetCatagory, AddCategory, UpdateCatagory, DeleteCatagory } from "layouts/Api";
+
 const CategoryProduct = () => {
   const [rows, setRows] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [catName, setCatName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [outlets, setOutlets] = useState([]);
+  const [selectedOutlet, setSelectedOutlet] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingOutlet, setEditingOutlet] = useState(null); // New state for editing outlet
 
   useEffect(() => {
     fetchCategories();
+    fetchOutlets();
   }, []);
 
- const fetchCategories = async () => {
-  try {
-    const token = localStorage.getItem("accessToken");
-    console.log(token, "token"); // Check the token value
-    const userId = localStorage.getItem("userId");
-    console.log(userId, "userId"); // Check the userId value
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
 
-    if (!token || !userId) {
-      throw new Error("User is not authenticated or userId is missing");
-    }
-
-    const response = await axios.get(GetCatagory, {
-      headers: {
-       
-        'Authorization': `Bearer ${token}`
-      }
-    });
+      const response = await axios.get(GetCatagory, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
       const fetchedData = response.data || [];
       setRows(formatRows(fetchedData));
@@ -55,13 +51,35 @@ const CategoryProduct = () => {
     }
   };
 
+  const fetchOutlets = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const mappedOutlets = response.data.map(outlet => ({
+        value: outlet.id,
+        label: outlet.outlet_Name
+      }));
+
+      setOutlets(mappedOutlets);
+    } catch (error) {
+      console.error("Error fetching outlet data:", error);
+      toast.error("Failed to fetch outlets.");
+    }
+  };
+
   const formatRows = (categories) => {
     return categories.map((category) => ({
       id: category.id,
       category: category.catName,
+      outlet: category.outletId, // Assuming outletId is part of the category object
       action: (
         <>
-          <IconButton onClick={() => handleEditClick(category.id, category.catName)}>
+          <IconButton onClick={() => handleEditClick(category)}>
             <EditIcon />
           </IconButton>
           <IconButton onClick={() => handleDeleteClick(category.id)}>
@@ -72,25 +90,28 @@ const CategoryProduct = () => {
     }));
   };
 
-  const handleEditClick = (id, currentName) => {
-    setEditingId(id);
-    setEditingName(currentName);
+  const handleEditClick = (category) => {
+    setEditingId(category.id);
+    setEditingName(category.catName);
+    setEditingOutlet({ value: category.outletId, label: category.outletName }); // Pre-fill selected outlet
     setIsEditModalOpen(true);
   };
 
   const handleSaveClick = async () => {
     try {
-      await axios.put(`${UpdateCatagory}?id=${editingId}&CatName=${editingName}`,{
+      await axios.put(`${UpdateCatagory}?id=${editingId}&CatName=${editingName}&OutletId=${editingOutlet.value}`, {
         id: editingId,
         catName: editingName,
+        outletId: editingOutlet.value, // Include outletId in the request
       });
       setRows((prevRows) =>
         prevRows.map((row) =>
-          row.id === editingId ? { ...row, category: editingName } : row
+          row.id === editingId ? { ...row, category: editingName, outlet: editingOutlet.label } : row
         )
       );
       setEditingId(null);
       setEditingName("");
+      setEditingOutlet(null);
       setIsEditModalOpen(false);
       toast.success("Category updated successfully!");
     } catch (error) {
@@ -113,10 +134,17 @@ const CategoryProduct = () => {
   const handleAddCategory = async (event) => {
     event.preventDefault();
     try {
-      //await axios.post(AddCategory, { catName });
-    await axios.post(`${AddCategory}?catName=${encodeURIComponent(catName)}`);
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const outletId = selectedOutlet ? selectedOutlet.value : null;
+      await axios.post(AddCategory, { catName, outletId }, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
       toast.success("Category added successfully!");
       setCatName("");
+      setSelectedOutlet(null);
       fetchCategories();
       toggleModal();
     } catch (error) {
@@ -169,6 +197,7 @@ const CategoryProduct = () => {
                     table={{
                       columns: [
                         { Header: "Category", accessor: "category", align: "center" },
+                        { Header: "Outlet", accessor: "outlet", align: "center" }, // New column for outlet
                         { Header: "Action", accessor: "action", align: "center" }
                       ],
                       rows: filteredRows
@@ -176,50 +205,61 @@ const CategoryProduct = () => {
                   />
                 </MDBox>
               </MDBox>
+
               {isModalOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
                   <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '10px', width: '400px', maxWidth: '80%', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <h2>Add Category</h2>
-                      <button onClick={toggleModal} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
+                      <button onClick={toggleModal} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>&times;</button>
                     </div>
                     <form onSubmit={handleAddCategory}>
-                      <div style={{ marginBottom: '15px' }}>
-                        <input
-                          type="text"
-                          style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}
-                          value={catName}
-                          onChange={(e) => setCatName(e.target.value)}
-                          name="catName"
-                          placeholder="Enter category name"
-                          required
-                        />
-                      </div>
-                      <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#344767', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px', fontSize: '16px' }}>Submit Category</button>
+                      <MDInput
+                        type="text"
+                        placeholder="Category Name"
+                        value={catName}
+                        onChange={(e) => setCatName(e.target.value)}
+                        required
+                      />
+                      <Select
+                        options={outlets}
+                        value={selectedOutlet}
+                        onChange={setSelectedOutlet}
+                        placeholder="Select Outlet"
+                        styles={{ container: base => ({ ...base, marginBottom: '15px' }) }}
+                      />
+                      <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#344767', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px' }}>
+                        Add Category
+                      </button>
                     </form>
                   </div>
                 </div>
               )}
+
               {isEditModalOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
                   <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '10px', width: '400px', maxWidth: '80%', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <h2>Edit Category</h2>
-                      <button onClick={toggleEditModal} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
+                      <button onClick={toggleEditModal} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>&times;</button>
                     </div>
-                    <form onSubmit={(e) => { e.preventDefault(); handleSaveClick(); }}>
-                      <div style={{ marginBottom: '15px' }}>
-                        <input
-                          type="text"
-                          style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          placeholder="Enter category name"
-                          required
-                        />
-                      </div>
-                      <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#344767', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px', fontSize: '16px' }}>Update Category</button>
-                    </form>
+                    <MDInput
+                      type="text"
+                      placeholder="Category Name"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      required
+                    />
+                    <Select
+                      options={outlets}
+                      value={editingOutlet}
+                      onChange={setEditingOutlet}
+                      placeholder="Select Outlet"
+                      styles={{ container: base => ({ ...base, marginBottom: '15px' }) }}
+                    />
+                    <button onClick={handleSaveClick} style={{ width: '100%', padding: '10px', backgroundColor: '#344767', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px' }}>
+                      Save Changes
+                    </button>
                   </div>
                 </div>
               )}
