@@ -48,7 +48,13 @@ const [selectedEditOutlet, setSelectedEditOutlet] = useState(null); // Declare t
 
   const fetchStaffTable = async () => {
     try {
-      const response = await axios.get("https://localhost:7171/api/Staff/GetStaff");
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const response = await axios.get("https://localhost:7171/api/Staff/GetStaff", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
       const fetchedData = response.data || [];
       setRows(formatRows(fetchedData));
     } catch (error) {
@@ -56,26 +62,35 @@ const [selectedEditOutlet, setSelectedEditOutlet] = useState(null); // Declare t
       toast.error("Failed to fetch staff data.");
     }
   };
+
   const fetchOutlets = async () => {
     try {
       const token = localStorage.getItem("accessToken");
+      console.log("Token:", token); // Log the token for verification
+  
       if (!token) throw new Error("User is not authenticated");
-
+  
       const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
+  
+      console.log("API Response:", response); // Log the full response
+      console.log("Response Data:", response.data); // Log the data property specifically
+  
       const mappedOutlets = response.data.map(outlet => ({
         value: outlet.id,
         label: outlet.outlet_Name
       }));
-
+  
+      console.log("Mapped Outlets:", mappedOutlets); // Log the mapped outlets array
+  
       setOutlets(mappedOutlets);
     } catch (error) {
-      console.error("Error fetching outlet data:", error);
+      console.error("Error fetching outlet data:", error); // Log the error in case of failure
       toast.error("Failed to fetch outlets.");
     }
   };
+  
 
   const formatRows = (data) => {
     return data.map((item) => ({
@@ -88,6 +103,8 @@ const [selectedEditOutlet, setSelectedEditOutlet] = useState(null); // Declare t
       salary: item.salary,
       email: item.email,
       password: item.password,
+      outlet_Id: item.outlet_Id, // Include outlet ID
+      outlet_Name:item.outlet_Name,
       action: (
         <>
          <IconButton onClick={() => handleEditClick(item)}>
@@ -110,6 +127,7 @@ const [selectedEditOutlet, setSelectedEditOutlet] = useState(null); // Declare t
     setSalary(item.salary);
     setEditingEmail(item.email);
     setEditingPassword(item.password);
+    setSelectedEditOutlet({value:item.outlet_Id,label:item.outlet_Name})
     setIsEditModalOpen(true);
   };
   const handleCancelEdit = () => {
@@ -187,6 +205,7 @@ const handleSaveClick = async () => {
   const handleAddStaff = async (event) => {
     event.preventDefault();
     try {
+      console.log("Selected Outlet ID:", selectedOutlet?.value);
       await axios.post('https://localhost:7171/api/Staff/AddStaff', {
         name: newName,
         phone: newPhone,
@@ -196,10 +215,12 @@ const handleSaveClick = async () => {
         salary: newSalary,
         email: newEmail,           // Add email
         password: newPassword,     // Add password
-        outlet_Id: selectedOutlet?.value, // Include outlet_Id
+        outlet_Id: selectedOutlet?.value,
+
     
       });
       toast.success("Staff added successfully!");
+      fetchStaffTable();
       closeModal();
       setNewName("");
       setNewPhone("");
@@ -408,6 +429,7 @@ const handleSaveClick = async () => {
                     { Header: "Email", accessor: "email" },
                     { Header: "Phone", accessor: "phone" },
                     { Header: "Role", accessor: "role" },
+                    { Header: "outlet_Name", accessor: "outlet_Name" },
                     { Header: "Actions", accessor: "action" }
                   ],
                   rows: formattedRows
@@ -447,7 +469,7 @@ const handleSaveClick = async () => {
             
                 />
                  <MDInput
-                    type="password"
+                    type="text"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="EnterPassword"
@@ -465,8 +487,8 @@ const handleSaveClick = async () => {
 
             <Select
                 options={outlets}
-                value={selectedEditOutlet}
-                onChange={(selectedOption) => setSelectedEditOutlet(selectedOption)}
+                value={selectedOutlet}
+                onChange={(selectedOption) => setSelectedOutlet(selectedOption)}
                 placeholder="Select Outlet"
                 required
               />
@@ -550,7 +572,7 @@ const handleSaveClick = async () => {
           style={modalStyles.input}
         />
         <MDInput
-          type="password"
+          type="text"
           value={editingPassword}
           onChange={(e) => setEditingPassword(e.target.value)}
           placeholder="Enter Password"
