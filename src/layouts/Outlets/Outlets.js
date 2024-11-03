@@ -138,9 +138,10 @@ const Outlets = () => {
     });
   };
 
-  const filteredOutlets = outlets.filter((outlet) =>
-    outlet.outlet_Name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOutlets = outlets.filter(
+    (outlet) => outlet.email && outlet.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
 
   const columns = [
     { Header: "Outlet Name", accessor: "outlet_Name" },
