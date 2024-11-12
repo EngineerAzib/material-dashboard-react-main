@@ -82,8 +82,6 @@ const [selectedEditOutlet, setSelectedEditOutlet] = useState(null); // Declare t
         label: outlet.outlet_Name
       }));
   
-      console.log("Mapped Outlets:", mappedOutlets); // Log the mapped outlets array
-  
       setOutlets(mappedOutlets);
     } catch (error) {
       console.error("Error fetching outlet data:", error); // Log the error in case of failure
@@ -91,32 +89,66 @@ const [selectedEditOutlet, setSelectedEditOutlet] = useState(null); // Declare t
     }
   };
   
-
   const formatRows = (data) => {
-    return data.map((item) => ({
-      id: item.id,
-      name: item.name,
-      phone: item.phone,
-      role: item.role,
-      niC_number: item.niC_number,
-      address: item.address,
-      salary: item.salary,
-      email: item.email,
-      password: item.password,
-      outlet_Id: item.outlet_Id, // Include outlet ID
-      outlet_Name:item.outlet_Name,
-      action: (
-        <>
-         <IconButton onClick={() => handleEditClick(item)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton onClick={() => handleDeleteClick(item.id)}>
-            <DeleteIcon />
-          </IconButton>
-        </>
-      ),
-    }));
+    if (!data || data.length === 0) {
+      console.log("Data is empty or undefined");
+      return []; // Return an empty array to avoid issues
+    }
+  
+    return data.map((item) => {
+      console.log("Processing item:", item); // Log each item
+      return {
+        id: item.id,
+        name: item.name,
+        phone: item.phone,
+        role: item.role,
+        niC_number: item.niC_number,
+        address: item.address,
+        salary: item.salary,
+        email: item.email,
+        password: item.password,
+        outlet_Id: item.outlet_Id,
+        outlet_Name: item.outlet_Name,
+        action: (
+          <>
+            <IconButton onClick={() => handleEditClick(item)}>
+              <EditIcon />
+            </IconButton>
+            <IconButton onClick={() => handleDeleteClick(item.id)}>
+              <DeleteIcon />
+            </IconButton>
+          </>
+        ),
+      };
+    });
   };
+  
+  // const formatRows = (data) => {
+  //   return data.map((item) => ({
+      
+  //     id: item.id,
+  //     name: item.name,
+  //     phone: item.phone,
+  //     role: item.role,
+  //     niC_number: item.niC_number,
+  //     address: item.address,
+  //     salary: item.salary,
+  //     email: item.email,
+  //     password: item.password,
+  //     outlet_Id: item.outlet_Id, // Include outlet ID
+  //     outlet_Name:item.outlet_Name,
+  //     action: (
+  //       <>
+  //        <IconButton onClick={() => handleEditClick(item)}>
+  //           <EditIcon />
+  //         </IconButton>
+  //         <IconButton onClick={() => handleDeleteClick(item.id)}>
+  //           <DeleteIcon />
+  //         </IconButton>
+  //       </>
+  //     ),
+  //   }));
+  // };
   const handleEditClick = (item) => {
     setEditingId(item.id);
     setEditingName(item.name);

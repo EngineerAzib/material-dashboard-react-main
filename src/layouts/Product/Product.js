@@ -15,12 +15,13 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { GetProduct,AddProduct,UpdateProduct ,DeleteProduct,getSupplier,GetCatagory } from "layouts/Api";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+import { GetProduct, AddProduct, UpdateProduct, DeleteProduct, getSupplier, GetCatagory } from "layouts/Api";
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [outlets, setOutlets] = useState([]); // State variable for outlets
   const [newProduct, setNewProduct] = useState({
     name: "",
     quantity: "",
@@ -28,7 +29,8 @@ const Product = () => {
     category: "",
     // image: null,
     barCode: "",
-    supplierId: "",
+    supplier: "",
+    outlet: "",
     isLowStockWarring: "", // New field for low stock warning
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,49 +38,96 @@ const Product = () => {
 
   useEffect(() => {
     fetchInitialData();
+    fetchOutlets();
   }, []);
 
+  // const fetchInitialData = async () => {
+  //   try {
+  //     const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
+  //       axios.get(getSupplier),
+  //       axios.get(GetCatagory),
+  //       axios.get(GetProduct),
+  //     ]);
+  //     setSuppliers(suppliersResponse.data || []);
+  //     setCategories(categoriesResponse.data || []);
+  //     setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || []));
+  //   } catch (error) {
+  //     toast.error("Failed to fetch data.");
+  //   }
+  // };
   const fetchInitialData = async () => {
-    try {
-      const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
-        axios.get(getSupplier),
-        axios.get(GetCatagory),
-        axios.get(GetProduct),
-      ]);
-      setSuppliers(suppliersResponse.data || []);
-      setCategories(categoriesResponse.data || []);
-      setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || []));
-    } catch (error) {
-      toast.error("Failed to fetch data.");
-    }
-  };
+  try {
+    const token = localStorage.getItem("accessToken");
+    console.log("Token:", token); // Log the token for verification
 
-  const formatProductData = (products, suppliers) => {
-    return products.map((product) => {
-      const supplier = suppliers.find(supplier => supplier.id === product.supplierId);
-      return {
-        id: product.id,
-        name: product.name,
-        quantity: product.quantity,
-        price: product.price,
-        category: product.categoryName,
-        // image: product.image.includes('/images/') ? `https://localhost:7171${product.image}` : product.image,
-        barcode: product.barCode || "N/A",
-        supplier: supplier ? supplier.supplierName : "N/A",
-        isLowStockWarring: product.isLowStockWarring || "N/A",
-        actions: (
-          <>
-            <IconButton onClick={() => handleEditClick(product)}>
-              <EditIcon />
-            </IconButton>
-            <IconButton onClick={() => handleDeleteProduct(product.id)}>
-              <DeleteIcon />
-            </IconButton>
-          </>
-        ),
-      };
+    if (!token) throw new Error("User is not authenticated");
+
+    // Set up headers for authorization
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
+      axios.get(getSupplier, { headers }),      // Pass headers for suppliers
+      axios.get(GetCatagory, { headers }),      // Pass headers for categories
+      axios.get(GetProduct, { headers })        // Pass headers for products
+    ]);
+    setSuppliers(suppliersResponse.data || []);
+    setCategories(categoriesResponse.data || []);
+    setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || [], outlets));
+  } catch (error) {
+    toast.error("Failed to fetch data.");
+  }
+};
+const fetchOutlets = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    console.log("Token:", token); // Log the token for verification
+
+    if (!token) throw new Error("User is not authenticated");
+
+    const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-  };
+
+    console.log("API Response:", response); // Log the full response
+    console.log("Response Data:", response.data); // Log the data property specifically
+
+    const mappedOutlets = response.data.map(outlet => ({
+      value: outlet.id,
+      label: outlet.outlet_Name
+    }));
+
+    setOutlets(mappedOutlets);
+  } catch (error) {
+    console.error("Error fetching outlet data:", error); // Log the error in case of failure
+    toast.error("Failed to fetch outlets.");
+  }
+};
+const formatProductData = (products) => {
+  return products.map((product) => {
+      return {
+      id: product.id,
+      name: product.name,
+      quantity: product.quantity,
+      price: product.price,
+      category: product.categoryName,
+      barcode: product.barCode || "N/A",
+      supplier:product.supplierName,
+      outlet: product.outlet_Name,
+      isLowStockWarring: product.isLowStockWarring || "N/A",
+      actions: (
+        <>
+          <IconButton onClick={() => handleEditClick(product)}>
+            <EditIcon />
+          </IconButton>
+          <IconButton onClick={() => handleDeleteProduct(product.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </>
+      ),
+    };
+  });
+};
+
 
   const generateBarcode = () => {
     const barCode = Math.floor(1000000 + Math.random() * 9000000).toString();
@@ -94,6 +143,7 @@ const Product = () => {
       category: product.categoryId,
       barCode: product.barCode,
       supplierId: product.supplierId,
+      Outlet_Id: product.Outlet_Id,  // Ensure this field matches the outlet ID
       // image: product.image.includes('https') ? product.image : null,
       isLowStockWarring: product.isLowStockWarring || "", // Populate the field with existing data
     });
@@ -110,6 +160,7 @@ const Product = () => {
     formData.append("CatId", newProduct.category);
     formData.append("Barcode", newProduct.barCode);
     formData.append("SupplierId", newProduct.supplierId);
+    formData.append("Outlet_Id", newProduct.Outlet_Id);  // Append outlet ID to form data
     formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
     // if (newProduct.image) formData.append("imageFile", newProduct.image);
 
@@ -134,7 +185,7 @@ const Product = () => {
     formData.append("SupplierId", newProduct.supplierId);
     formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
     // if (newProduct.image) formData.append("imageFile", newProduct.image);
-
+    formData.append("Outlet_Id", newProduct.Outlet_Id);  // Append outlet ID to form data
     try {
       await axios.post(AddProduct, formData);
       fetchInitialData();
@@ -307,6 +358,7 @@ const Product = () => {
       { Header: "Category", accessor: "category" },
       { Header: "Barcode", accessor: "barcode" },
       { Header: "Supplier", accessor: "supplier" },
+      { Header: "Outlet", accessor: "outlet" }, // Outlet column added
       { Header: "Low Stock Warning", accessor: "isLowStockWarring" }, // New column for low stock warning
       { Header: "Actions", accessor: "actions" },
     ],
@@ -435,6 +487,25 @@ const Product = () => {
             </select>
           </label>
         </div>
+        <div style={modalStyles.inputContainer}>
+                <label style={modalStyles.label}>
+                  Outlet
+                  <select
+                    name="Outlet_Id"
+                    style={modalStyles.input}
+                    value={newProduct.Outlet_Id}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Outlet</option>
+                    {outlets.map((outlet) => (
+                      <option key={outlet.value} value={outlet.value}>
+                        {outlet.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
         <div style={modalStyles.footer}>
           <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
             Cancel

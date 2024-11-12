@@ -7,6 +7,7 @@ import StaffTable from "layouts/Staff/StaffTable.js";
 import Product from "layouts/Product/Product";
 import Supplier from "layouts/supplier/supplier";
 import Billing from "layouts/billing";
+import axios from 'axios';
 import PaymentManagement from "layouts/Payment/payment";
 import DocumentTypeManagement from "layouts/DocumentType/DocumentType";
 import PurchaseProduct from "layouts/PurchasProduct/PurchaseProduct";
@@ -14,7 +15,9 @@ import Outlets from "layouts/Outlets/Outlets";
 import SalesDashboard from "layouts/SalesDashboard/SalesDashboard";
 import SaleHistory from "layouts/SaleHistory/SaleHistory";
 import UserCompany from "layouts/UserCompany/UserCompany";
-
+import DatabaseBackup from "layouts/DatabaseBackup/DatabaseBackup";
+import CompanySetting from "layouts/CompanySetting/CompanySetting";
+import OutletSetting from "layouts/OutletSetting/OutletSetting";
 import Expense from "layouts/expense/expense";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -38,7 +41,38 @@ const isAuthenticated = () => !!localStorage.getItem('accessToken');
 // Log the result to the console
 console.log('Is user authenticated?', isAuthenticated());
 
+const isAdmin = async () => {
+  try {
+    // Retrieve the token from local storage or another secure location
+    const token = localStorage.getItem('accessToken'); 
 
+    // Make the API request with the Authorization header
+    const response = await axios.get('https://localhost:7171/api/UserAuthentication/GetCompany', {
+      headers: {
+        'accept': '*/*',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    // Extract and log the user role from the response
+    const userRole = response.data.roles[0];
+    const isAdmin = userRole === 'ADMIN';
+    console.log("Admin status:", isAdmin);
+
+    // Store the result in localStorage for synchronous access later
+    localStorage.setItem('isAdmin', isAdmin);
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    localStorage.setItem('isAdmin', false); // Default to false on error
+  }
+};
+// const logIsAdmin = async () => {
+//   const adminStatus = await isAdmin(); // Await the async function to get the result
+//   console.log('Is user an admin?', adminStatus); // Log the result of isAdmin
+// };
+// logIsAdmin();
+const isAdmins = localStorage.getItem('isAdmin') === 'true';
+console.log(isAdmins,"isAdmins")
 const routes = [
   {
     type: "collapse",
@@ -47,6 +81,22 @@ const routes = [
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
     component: isAuthenticated() ? <SalesDashboard /> : <Navigate to="/authentication/sign-in" />,
+  },
+  {
+    type: "collapse",
+    name: "CompanySetting",
+    key: "CompanySetting",
+    icon: <Icon fontSize="small">CompanySetting</Icon>,
+    route: "/CompanySetting",
+    component: isAuthenticated() ? <CompanySetting /> : <Navigate to="/authentication/sign-in" />,
+  },
+  {
+    type: "collapse",
+    name: "OutletSetting",
+    key: "OutletSetting",
+    icon: <Icon fontSize="small">OutletSetting</Icon>,
+    route: "/OutletSetting",
+    component: isAuthenticated() ? <OutletSetting /> : <Navigate to="/authentication/sign-in" />,
   },
   // {
   //   type: "collapse",
@@ -87,21 +137,42 @@ const routes = [
     component: isAuthenticated() ? <Outlets /> : <Navigate to="/authentication/sign-in" />,
   },
 
-  {
+  // {
+  //   type: "collapse",
+  //   name: "User Company",
+  //   key: "User Company",
+  //   icon: <CategoryIcon fontSize="small" />,
+  //   route: "/UserCompany",
+  //   //component: isAuthenticated() ? <UserCompany /> : <Navigate to="/authentication/sign-in" />,
+  //   component: (isAuthenticated() && isAdmins) ? <UserCompany /> : null,
+  // },
+
+  ...(isAuthenticated() && isAdmins ? [{
     type: "collapse",
     name: "User Company",
     key: "User Company",
     icon: <CategoryIcon fontSize="small" />,
     route: "/UserCompany",
-    component: isAuthenticated() ? <UserCompany /> : <Navigate to="/authentication/sign-in" />,
-  },
+    component: <UserCompany />,
+  }] : []),
+  // Add other routes here as needed
+  ...(isAuthenticated() && isAdmins ? [{
+    type: "collapse",
+    name: "DatabaseBackup",
+    key: "DatabaseBackup",
+    icon: <CategoryIcon fontSize="small" />,
+    route: "/DatabaseBackup",
+    component: <DatabaseBackup />,
+  }] : []),
+
   {
     type: "collapse",
     name: "Dine Tables",
     key: "dine-tables",
     icon: <DinnerDiningIcon fontSize="small" />,
     route: "/dinetables",
-    component: isAuthenticated() ? <DineTable /> : <Navigate to="/authentication/sign-in" />,
+    // component: isAuthenticated() ? <DineTable /> : <Navigate to="/authentication/sign-in" />,
+    component: (isAuthenticated() && isAdmin()) ? <DineTable /> : null,
   },
   {
     type: "collapse",

@@ -20,7 +20,11 @@ const PurchaseOrder = () => {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [outlets, setOutlets] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState({ add: false, edit: false });
+
   const [newOrder, setNewOrder] = useState({
     oderGiveDate: "",
     oderReceiveDate: "",
@@ -34,53 +38,61 @@ const PurchaseOrder = () => {
     paidPayment: "",
     productId: "",
     suplierId: "",
+    outlet: "",
   });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState({ add: false, edit: false });
 
   useEffect(() => {
     fetchInitialData();
+    fetchOutlets();
   }, []);
 
   const fetchInitialData = async () => {
     try {
-      // Fetch products and suppliers first, then fetch purchase orders
-      const [suppliersResponse, productsResponse] = await Promise.all([
-        axios.get("https://localhost:7171/api/Supplier/GetSupplier"),
-        axios.get("https://localhost:7171/GetProduct"),
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const headers = { Authorization: `Bearer ${token}` };
+      const [suppliersResponse, productsResponse, ordersResponse] = await Promise.all([
+        axios.get("https://localhost:7171/api/Supplier/GetSupplier", { headers }),
+        axios.get("https://localhost:7171/GetProduct", { headers }),
+        axios.get("https://localhost:7171/api/Purchaseorder/GetPurchaseOrde", { headers }),
       ]);
-  
-      // Set suppliers and products after fetching
+
       setSuppliers(suppliersResponse.data || []);
       setProducts(productsResponse.data || []);
-  
-      // Fetch purchase orders after setting products and suppliers
-      const purchaseOrdersResponse = await axios.get(
-        "https://localhost:7171/api/Purchaseorder/GetPurchaseOrde"
-      );
-       // Log fetched purchase orders data
-    console.log("Purchase Orders Data:", purchaseOrdersResponse.data);
-      const formattedOrders = formatOrderData(purchaseOrdersResponse.data || []);
-    setPurchaseOrders(formattedOrders);
-  } catch (error) {
-    toast.error("Failed to fetch data.");
-  }
-};
+      setPurchaseOrders(formatOrderData(ordersResponse.data || []));
+    } catch (error) {
+      toast.error("Failed to fetch data.");
+    }
+  };
 
-  
+  const fetchOutlets = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOutlets(
+        response.data.map((outlet) => ({
+          value: outlet.id,
+          label: outlet.outlet_Name,
+        }))
+      );
+    } catch (error) {
+      toast.error("Failed to fetch outlets.");
+    }
+  };
   const formatOrderData = (orders) => {
     return orders.map((order) => {
-      const product = products.find((product) => product.id === order.productId);
-      const supplier = suppliers.find(
-        (supplier) => supplier.id === order.suplierId
-      );
-  
-      // Format date strings to display only date, without time
-      const formattedGiveDate = new Date(order.oderGiveDate).toLocaleDateString();
-      const formattedReceiveDate = new Date(order.oderReceiveDate).toLocaleDateString();
+        // const formattedGiveDate = new Date(order.oderGiveDate).toLocaleDateString();
+        // const formattedReceiveDate = new Date(order.oderReceiveDate).toLocaleDateString();
+        const formattedGiveDate =  new Date(order.oderGiveDate).toISOString().split('T')[0];
+        const formattedReceiveDate = new Date(order.oderReceiveDate).toISOString().split('T')[0];
       return {
         id: order.id,
-        oderGiveDate:formattedGiveDate,
+        oderGiveDate: formattedGiveDate,
         oderReceiveDate: formattedReceiveDate,
         orderStatus: order.orderStatus ? "Completed" : "Pending",
         paymentStatus: order.paymentStatus ? "Paid" : "Unpaid",
@@ -90,8 +102,10 @@ const PurchaseOrder = () => {
         receiveQuantity: order.receiveQuantity,
         totalPayment: order.totalPayment,
         paidPayment: order.paidPayment,
-        product: order.productName || "N/A",
-        supplier: order.supplierName || "N/A", 
+        
+        product: order.productName,
+       supplier: order.supplierName,
+        outlet: order.outlet_Name,
         actions: (
           <>
             <IconButton onClick={() => handleEditClick(order)}>
@@ -105,12 +119,16 @@ const PurchaseOrder = () => {
       };
     });
   };
-
   const handleEditClick = (order) => {
+    console.log("Order being edited:", order); // Log to check field names
     setEditingOrder(order);
     setNewOrder({
-      oderGiveDate: order.oderGiveDate,
-      oderReceiveDate: order.oderReceiveDate,
+      
+      // oderGiveDate:new Date(order.oderGiveDate).toLocaleDateString(),
+      
+      // oderReceiveDate:new Date(order.oderReceiveDate).toLocaleDateString(),
+      oderGiveDate: new Date(order.oderGiveDate).toISOString().split('T')[0],
+      oderReceiveDate: new Date(order.oderReceiveDate).toISOString().split('T')[0],
       orderStatus: order.orderStatus,
       paymentStatus: order.paymentStatus,
       unitPrice: order.unitPrice,
@@ -121,32 +139,88 @@ const PurchaseOrder = () => {
       paidPayment: order.paidPayment,
       productId: order.productId,
       suplierId: order.suplierId,
+      outlet: order.outlet_Id || order.Outlet_Id,
     });
     setIsModalOpen({ ...isModalOpen, edit: true });
   };
-
+  
+  
   const handleOrderSubmit = async (event, isEdit) => {
     event.preventDefault();
     try {
+      const orderData = {
+        ...newOrder,
+        Outlet_Id: newOrder.outlet, // Ensure `outlet` is included in the payload
+      };
+  
       if (isEdit) {
         await axios.put(
           `https://localhost:7171/api/Purchaseorder/UpdatePurchaseOrde?id=${editingOrder.id}`,
-          newOrder
+          orderData
         );
         toast.success("Order updated successfully!");
+        fetchInitialData();
+        // Update the local `purchaseOrders` state with the edited data
+        setPurchaseOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === editingOrder.id
+              ? {
+                  ...order,
+                  orderGiveDate: newOrder.orderGiveDate,
+                  orderReceiveDate: newOrder.orderReceiveDate,
+                  orderStatus: newOrder.orderStatus,
+                  paymentStatus: newOrder.paymentStatus,
+                  unitPrice: newOrder.unitPrice,
+                  totalPrice: newOrder.totalPrice,
+                  orderQuantity: newOrder.orderQuantity,
+                  receiveQuantity: newOrder.receiveQuantity,
+                  totalPayment: newOrder.totalPayment,
+                  paidPayment: newOrder.paidPayment,
+                  productId: newOrder.productId,
+                  supplierId: newOrder.supplierId,
+                  outlet: newOrder.outlet, // Update outlet in the order
+                }
+              : order
+          )
+        );
       } else {
         await axios.post(
           "https://localhost:7171/api/Purchaseorder/AddPurchaseOrde",
-          newOrder
+          orderData
         );
         toast.success("Order added successfully!");
       }
+  
       fetchInitialData();
       closeModal();
     } catch (error) {
+      console.error("Error updating/adding order:", error);
       toast.error(isEdit ? "Failed to update order." : "Failed to add order.");
     }
   };
+  
+  // Helper function to close the modal and reset form fields
+  const closeModal = () => {
+    setIsModalOpen({ add: false, edit: false });
+    setEditingOrder(null);
+    setNewOrder({
+      orderGiveDate: "",
+      orderReceiveDate: "",
+      orderStatus: true,
+      paymentStatus: true,
+      unitPrice: "",
+      totalPrice: "",
+      orderQuantity: "",
+      receiveQuantity: "",
+      totalPayment: "",
+      paidPayment: "",
+      productId: "",
+      supplierId: "",
+      outlet: "",
+    });
+  };
+  
+  
 
   const handleDeleteOrder = async (id) => {
     try {
@@ -186,28 +260,32 @@ const PurchaseOrder = () => {
     setSearchTerm(event.target.value);
   };
 
-  const closeModal = () => {
-    setIsModalOpen({ add: false, edit: false });
-    setEditingOrder(null);
-    setNewOrder({
-      oderGiveDate: "",
-      oderReceiveDate: "",
-      orderStatus: true,
-      paymentStatus: true,
-      unitPrice: 0,
-      totalPrice: 0,
-      orderQuantity: 0,
-      receiveQuantity: 0,
-      totalPayment: 0,
-      paidPayment: 0,
-      productId: "",
-      suplierId: "",
-    });
-  };
+  // const closeModal = () => {
+  //   setIsModalOpen({ add: false, edit: false });
+  //   setEditingOrder(null);
+  //   setNewOrder({
+  //     oderGiveDate: "",
+  //     oderReceiveDate: "",
+  //     orderStatus: true,
+  //     paymentStatus: true,
+  //     unitPrice: 0,
+  //     totalPrice: 0,
+  //     orderQuantity: 0,
+  //     receiveQuantity: 0,
+  //     totalPayment: 0,
+  //     paidPayment: 0,
+  //     productId: "",
+  //     suplierId: "",
+  //   });
+  // };
 
+  // const filteredOrders = purchaseOrders.filter((order) =>
+  //   order.product.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
   const filteredOrders = purchaseOrders.filter((order) =>
-    order.product.toLowerCase().includes(searchTerm.toLowerCase())
+    order.product && order.product.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
 
   const columns = [
     { Header: "Order Date", accessor: "oderGiveDate" },
@@ -221,10 +299,10 @@ const PurchaseOrder = () => {
     { Header: "Total Payment", accessor: "totalPayment" },
     { Header: "Paid Payment", accessor: "paidPayment" },
     { Header: "Order Status", accessor: "orderStatus" },
+    { Header: "Outlet", accessor: "outlet" },
     { Header: "Payment Status", accessor: "paymentStatus" },
     { Header: "Actions", accessor: "actions" },
   ];
-
   const modalStyles = {
     button: {
       padding: "10px 20px",
@@ -382,6 +460,20 @@ const PurchaseOrder = () => {
                   placeholder="Order Receive Date"
                   style={modalStyles.input}
                 />
+                 {/* Outlet Dropdown */}
+                <select
+                  name="outlet"
+                  value={newOrder.outlet}
+                  onChange={handleInputChange}
+                  style={modalStyles.select}
+                >
+                  <option value="">Select Outlet</option>
+                  {outlets.map((outlet) => (
+                    <option key={outlet.value} value={outlet.value}>
+                      {outlet.label}
+                    </option>
+                  ))}
+                </select>
                 <select
                   name="productId"
                   value={newOrder.productId}
