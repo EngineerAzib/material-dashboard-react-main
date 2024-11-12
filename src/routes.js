@@ -127,15 +127,14 @@ const routes = [
     route: "/categoryproduct",
     component: isAuthenticated() ? <CategoryProduct /> : <Navigate to="/authentication/sign-in" />,
   },
-
-  {
+  ...(isAuthenticated() && isAdmins ? [{
     type: "collapse",
     name: "Outlets",
     key: "Outlets",
     icon: <CategoryIcon fontSize="small" />,
     route: "/Outlets",
     component: isAuthenticated() ? <Outlets /> : <Navigate to="/authentication/sign-in" />,
-  },
+  }] : []),
 
   // {
   //   type: "collapse",
