@@ -20,12 +20,15 @@ const Outlets = () => {
   const [companies, setCompanies] = useState([]); // State to store companies
   const [editingOutlet, setEditingOutlet] = useState(null);
   const [newOutlet, setNewOutlet] = useState({
+    id:"",
     outlet_Name: "",
     outlet_Address: "",
     outlet_Phone_Number: "",
     outlet_Owner_Name: "",
+    company_Name:" ",
     //isActive: true,
     email: "",
+    password:" ",
     company_Id: "", // This will hold the selected company ID
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,6 +55,7 @@ const Outlets = () => {
          
         'Authorization': `Bearer ${token}`
     }});
+    console.log("Response Data:", response); // Log the response data
       setOutlets(response.data || []);
     } catch (error) {
       toast.error("Failed to fetch outlets.");
@@ -71,12 +75,14 @@ const Outlets = () => {
   const handleEditClick = (outlet) => {
     setEditingOutlet(outlet);
     setNewOutlet({
+      id:outlet.id,
       outlet_Name: outlet.outlet_Name,
       outlet_Address: outlet.outlet_Address,
       outlet_Phone_Number: outlet.outlet_Phone_Number,
       outlet_Owner_Name: outlet.outlet_Owner_Name,
       isActive: outlet.isActive,
       email: outlet.email,
+      password:outlet.password,
       company_Id: outlet.company_Id,  // Set the company ID when editing
     });
     setIsModalOpen({ ...isModalOpen, edit: true });
@@ -128,19 +134,22 @@ const Outlets = () => {
     setIsModalOpen({ add: false, edit: false });
     setEditingOutlet(null);
     setNewOutlet({
+      id:"",
       outlet_Name: "",
       outlet_Address: "",
       outlet_Phone_Number: "",
       outlet_Owner_Name: "",
       isActive: true,
       email: "",
+      password:"",
       company_Id: "",
     });
   };
 
-  const filteredOutlets = outlets.filter((outlet) =>
-    outlet.outlet_Name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOutlets = outlets.filter(
+    (outlet) => outlet.email && outlet.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
 
   const columns = [
     { Header: "Outlet Name", accessor: "outlet_Name" },
@@ -148,6 +157,8 @@ const Outlets = () => {
     { Header: "Phone Number", accessor: "outlet_Phone_Number" },
     { Header: "Owner", accessor: "outlet_Owner_Name" },
     { Header: "Email", accessor: "email" },
+    { Header: "company_Name", accessor: "company_Name" },
+    
     { Header: "Actions", accessor: "actions" },
   ];
 
@@ -341,6 +352,14 @@ const Outlets = () => {
                   value={newOutlet.email}
                   onChange={handleInputChange}
                   placeholder="Email"
+                  style={modalStyles.input}
+                />
+                  <MDInput
+                  type="text"
+                  name="password"
+                  value={newOutlet.password}
+                  onChange={handleInputChange}
+                  placeholder="Password"
                   style={modalStyles.input}
                 />
 

@@ -41,36 +41,78 @@ const Billing = () => {
     </button>
   );
   // Handles the search input change and product fetching logic
-  const handleSearchChange = async (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    if (value.length > 0) {
-  try {
-    const response = await axios.get(`${GetProduct}?query=${value}`);
+//   const handleSearchChange = async (e) => {
+//     const value = e.target.value;
+//     setSearchTerm(value);
+//     if (value.length > 0) {
+//   try {
+//     const response = await axios.get(`${GetProduct}?query=${value}`);
     
-    const filteredResults = response.data.filter(product => {
-      const name = product.name || ''; // Safely handle null or undefined
-      const barCode = product.barCode || ''; // Safely handle null or undefined
-      const code = product.code || ''; // Safely handle null or undefined
+//     const filteredResults = response.data.filter(product => {
+//       const name = product.name || ''; // Safely handle null or undefined
+//       const barCode = product.barCode || ''; // Safely handle null or undefined
+//       const code = product.code || ''; // Safely handle null or undefined
       
-      return (
-        name.toLowerCase().startsWith(value.toLowerCase()) || 
-        barCode.toLowerCase().startsWith(value.toLowerCase()) || 
-        code.toLowerCase().startsWith(value.toLowerCase())
-      );
-    });
+//       return (
+//         name.toLowerCase().startsWith(value.toLowerCase()) || 
+//         barCode.toLowerCase().startsWith(value.toLowerCase()) || 
+//         code.toLowerCase().startsWith(value.toLowerCase())
+//       );
+//     });
     
-    setSearchResults(filteredResults);
-  } catch (error) {
-    console.error("Error fetching product data:", error);
-    toast.error("Error fetching product data:",{containerId2:"SaleHistory"});
-  }
-} else {
-  setSearchResults([]);
-}
+//     setSearchResults(filteredResults);
+//   } catch (error) {
+//     console.error("Error fetching product data:", error);
+//     toast.error("Error fetching product data:",{containerId2:"SaleHistory"});
+//   }
+// } else {
+//   setSearchResults([]);
+// }
 
     
-  };
+//   };
+const handleSearchChange = async (e) => {
+  const value = e.target.value;
+  setSearchTerm(value);
+
+  if (value.length > 0) {
+    try {
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem("accessToken");
+      console.log("Token:", token); // Log the token for verification
+
+      if (!token) throw new Error("User is not authenticated");
+
+      // Set up headers for authorization
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      // Make the request with headers
+      const response = await axios.get(`${GetProduct}?query=${value}`, { headers });
+
+      const filteredResults = response.data.filter(product => {
+        const name = product.name || ''; // Safely handle null or undefined
+        const barCode = product.barCode || ''; // Safely handle null or undefined
+        const code = product.code || ''; // Safely handle null or undefined
+        
+        return (
+          name.toLowerCase().startsWith(value.toLowerCase()) || 
+          barCode.toLowerCase().startsWith(value.toLowerCase()) || 
+          code.toLowerCase().startsWith(value.toLowerCase())
+        );
+      });
+
+      // Do something with filteredResults, e.g., update state
+      console.log(filteredResults);
+      setSearchResults(filteredResults);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Error fetching product data:",{containerId2:"SaleHistory"});
+        }
+      } else {
+        setSearchResults([]);
+    }
+};
+
   const handleCloseOptionsModal = () => {
     setShowOptionsModal(false);
     // Reset relevant states to their initial values
@@ -143,21 +185,47 @@ const handleQuantityChange = (index, value) => {
   setProducts(updatedProducts);
 };
   // Opens the modal and fetches payment methods from the API
+  // const handleOpenModal = async () => {
+  //   const total = products.reduce((acc, product) => acc + product.amount, 0);
+  //   setTotalAmount(total);
+  //   setEditableTotalAmount(total);
+
+  //   try {
+  //     const response = await axios.get(GetPayment);
+  //     const paymentMethods = response.data;
+  //     setPaymentMethods(paymentMethods);
+  //   } catch (error) {
+  //     toast.error("Error fetching payment methods:",{containerId2:"SaleHistory"});
+  //   }
+
+  //   setModalOpen(true); // Open the modal
+  // };
   const handleOpenModal = async () => {
     const total = products.reduce((acc, product) => acc + product.amount, 0);
     setTotalAmount(total);
     setEditableTotalAmount(total);
-
+  
     try {
-      const response = await axios.get(GetPayment);
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem("accessToken");
+      console.log("Token:", token); // Log the token for verification
+  
+      if (!token) throw new Error("User is not authenticated");
+  
+      // Set up headers for authorization
+      const headers = { 'Authorization': `Bearer ${token}` };
+  
+      // Make the request with headers
+      const response = await axios.get(GetPayment, { headers });
       const paymentMethods = response.data;
       setPaymentMethods(paymentMethods);
     } catch (error) {
-      toast.error("Error fetching payment methods:",{containerId2:"SaleHistory"});
+      toast.error("Error fetching payment methods", { containerId: "SaleHistory" });
     }
-
+  
     setModalOpen(true); // Open the modal
   };
+  
 
   // Handles payment method selection and custom amount visibility
   const handlePaymentClick = (methodId) => {
@@ -222,7 +290,10 @@ const handleQuantityChange = (index, value) => {
   
       // If validation passes, prepare and send the billing data
       const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("accessToken");
+      console.log("Token:", token); // Log the token for verification
   
+      if (!token) throw new Error("User is not authenticated");
       const payload = products.flatMap(product => 
         Object.keys(selectedPaymentMethods).map(methodId => ({
           BillingDate: new Date().toISOString(),
@@ -238,7 +309,10 @@ const handleQuantityChange = (index, value) => {
         }))
       );
       
-      await axios.post(AddBilling, payload);
+      await axios.post(AddBilling, payload
+        , {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
   
       toast.success("Billing information saved successfully!",{containerId:"Billing"});
       setShowOptionsModal(true);
@@ -381,15 +455,48 @@ const handleGeneratePDF = async () => {
   };
   const [lastBilling, setLastBilling] = useState(null);
 
+  // useEffect(() => {
+  //   // Fetch the last billing data from the API
+  //   fetch(GetBilling)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       console.log('API Response:', data); // Check the API response in the console
+  //       setLastBilling(data); // Set the billing data from the API
+  //     })
+  //     .catch(error => console.error("Error fetching billing data:", error));
+  // }, []);
   useEffect(() => {
-    // Fetch the last billing data from the API
-    fetch(GetBilling)
-      .then(response => response.json())
-      .then(data => {
-        console.log('API Response:', data); // Check the API response in the console
+    const fetchBillingData = async () => {
+      try {
+        // Retrieve the token from localStorage
+        const token = localStorage.getItem("accessToken");
+        console.log("Token:", token); // Log the token for verification
+  
+        if (!token) throw new Error("User is not authenticated");
+  
+        // Set up headers for authorization
+        const headers = { 'Authorization': `Bearer ${token}` };
+  
+        // Fetch the last billing data from the API with headers
+        const response = await fetch(GetBilling, {
+          method: 'GET',
+          headers: headers
+        });
+  
+        // Check if the response is ok, then parse it
+        if (!response.ok) {
+          throw new Error("Failed to fetch billing data");
+        }
+  
+        const data = await response.json();
+        console.log("API Response:", data); // Check the API response in the console
         setLastBilling(data); // Set the billing data from the API
-      })
-      .catch(error => console.error("Error fetching billing data:", error));
+      } catch (error) {
+        console.error("Error fetching billing data:", error);
+      }
+    };
+  
+    fetchBillingData();
   }, []);
   
   return (

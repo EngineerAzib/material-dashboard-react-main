@@ -5,7 +5,12 @@ import { GetDailySalesMinusPaymentReceived,GetWeeklySalesMinusPaymentReceived,Ge
 
 export const GetDailySaleMinusPaymentReceived = async () => {
     try {
-        const response = await axios.get(GetDailySalesMinusPaymentReceived);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetDailySalesMinusPaymentReceived, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetDailySaleMinusPaymentReceived', error);
@@ -14,7 +19,12 @@ export const GetDailySaleMinusPaymentReceived = async () => {
 };
 export const GetWeeklySaleMinusPaymentReceived = async () => {
     try {
-        const response = await axios.get(GetWeeklySalesMinusPaymentReceived);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetWeeklySalesMinusPaymentReceived, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetWeeklySaleMinusPaymentReceived', error);
@@ -23,7 +33,12 @@ export const GetWeeklySaleMinusPaymentReceived = async () => {
 };
 export const GetMonthlySaleMinusPaymentReceived = async () => {
     try {
-        const response = await axios.get(GetMonthlySalesMinusPaymentReceived);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetMonthlySalesMinusPaymentReceived, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetMonthlySaleMinusPaymentReceived', error);
@@ -32,7 +47,12 @@ export const GetMonthlySaleMinusPaymentReceived = async () => {
 };
 export const GetYearlySaleMinusPaymentReceived = async () => {
     try {
-        const response = await axios.get(GetYearlySalesMinusPaymentReceived);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetYearlySalesMinusPaymentReceived, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetYearlySaleMinusPaymentReceived:', error);

@@ -56,16 +56,53 @@ const BillingHistory = () => {
     filterRowsByDate();
   }, [startDate, endDate]);
 
+  useEffect(() => {
+    fetchBillingHistory();
+    fetchOutlets(); // Fetch outlets data
+  }, []);
   const fetchBillingHistory = async () => {
     try {
-      const response = await axios.get(GetBilling);
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+  
+      const response = await axios.get(GetBilling, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
       console.log(response);
       const fetchedData = response.data || [];
       setRows(formatRows(fetchedData));
       setFilteredRows(formatRows(fetchedData));
     } catch (error) {
       console.error("Error fetching billing data:", error);
-      toast.error("Failed to fetch billing data.",{containerId:"SaleHistory"});
+      toast.error("Failed to fetch billing data.", { containerId: "SaleHistory" });
+    }
+  };
+  const fetchOutlets = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      console.log("Token:", token); // Log the token for verification
+  
+      if (!token) throw new Error("User is not authenticated");
+  
+      const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+  
+      console.log("API Response:", response); // Log the full response
+      console.log("Response Data:", response.data); // Log the data property specifically
+  
+      const mappedOutlets = response.data.map(outlet => ({
+        value: outlet.id,
+        label: outlet.outlet_Name
+      }));
+  
+      console.log("Mapped Outlets:", mappedOutlets); // Log the mapped outlets array
+  
+      setOutlets(mappedOutlets);
+    } catch (error) {
+      console.error("Error fetching outlet data:", error); // Log the error in case of failure
+      toast.error("Failed to fetch outlets.");
     }
   };
   const userId = localStorage.getItem("userId");
@@ -83,6 +120,8 @@ const BillingHistory = () => {
       totalAmount: item.totalAmount,
       paymentAmount: item.paymentAmount,
       status: item.status,
+      outlet_Id: item.outlet_Id, // Include outlet ID
+      outlet_Name:item.outlet_Name,
     }));
   };
   const handleEdit = (rowData) => {
@@ -307,6 +346,7 @@ const BillingHistory = () => {
                     { Header: "Unit Price", accessor: "unitPrice", width: "15%", align: "right" },
                     { Header: "Total Amount", accessor: "totalAmount", width: "15%", align: "right" },
                     { Header: "Payment Amount", accessor: "paymentAmount", width: "15%", align: "right" },
+                    { Header: "outlet_Name", accessor: "outlet_Name" },
                     { Header: "Status", accessor: "status", width: "10%", align: "center" },
                     { Header: "Action", accessor: "action", width: "20%", align: "center", Cell: ({ row }) => (
                       <div>

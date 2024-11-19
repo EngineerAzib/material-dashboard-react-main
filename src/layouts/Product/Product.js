@@ -13,8 +13,9 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { GetProduct, AddProduct, UpdateProduct, DeleteProduct, getSupplier, GetCatagory } from "layouts/Api";
 
 const Product = () => {
@@ -23,15 +24,18 @@ const Product = () => {
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [outlets, setOutlets] = useState([]); // State variable for outlets
   const [newProduct, setNewProduct] = useState({
     name: "",
     quantity: "",
     price: "",
     category: "",
     barCode: "",
-    supplierId: "",
-    outlet_Id: "",
-    isLowStockWarring: "",
+
+    supplier: "",
+    outlet: "",
+    isLowStockWarring: "", // New field for low stock warning
+
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState({ add: false, edit: false });
@@ -41,74 +45,95 @@ const Product = () => {
     fetchOutlets();
   }, []);
 
+  // const fetchInitialData = async () => {
+  //   try {
+  //     const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
+  //       axios.get(getSupplier),
+  //       axios.get(GetCatagory),
+  //       axios.get(GetProduct),
+  //     ]);
+  //     setSuppliers(suppliersResponse.data || []);
+  //     setCategories(categoriesResponse.data || []);
+  //     setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || []));
+  //   } catch (error) {
+  //     toast.error("Failed to fetch data.");
+  //   }
+  // };
   const fetchInitialData = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("User is not authenticated");
 
-      const headers = { Authorization: `Bearer ${token}` };
-      const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
-        axios.get(getSupplier, { headers }),
-        axios.get(GetCatagory, { headers }),
-        axios.get(GetProduct, { headers }),
-      ]);
+  try {
+    const token = localStorage.getItem("accessToken");
+    console.log("Token:", token); // Log the token for verification
 
-      setSuppliers(suppliersResponse.data || []);
-      setCategories(categoriesResponse.data || []);
-      setProducts(formatProductData(productsResponse.data || []));
-    } catch (error) {
-      console.error("Error fetching initial data:", error);
-      toast.error("Failed to fetch data.");
-    }
-  };
+    if (!token) throw new Error("User is not authenticated");
 
-  const fetchOutlets = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("User is not authenticated");
+    // Set up headers for authorization
+    const headers = { 'Authorization': `Bearer ${token}` };
 
-      const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const mappedOutlets = response.data.map((outlet) => ({
-        value: outlet.id,
-        label: outlet.outlet_Name,
-      }));
-      setOutlets(mappedOutlets);
-    } catch (error) {
-      console.error("Error fetching outlet data:", error);
-      toast.error("Failed to fetch outlets.");
-    }
-  };
+    const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
+      axios.get(getSupplier, { headers }),      // Pass headers for suppliers
+      axios.get(GetCatagory, { headers }),      // Pass headers for categories
+      axios.get(GetProduct, { headers })        // Pass headers for products
+    ]);
+    setSuppliers(suppliersResponse.data || []);
+    setCategories(categoriesResponse.data || []);
+    setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || [], outlets));
+  } catch (error) {
+    toast.error("Failed to fetch data.");
+  }
+};
+const fetchOutlets = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    console.log("Token:", token); // Log the token for verification
 
-  const formatProductData = (products) => {
-    return products.map((product) => {
-      const supplier = suppliers.find((supplier) => supplier.id === product.supplierId);
-      const outlet = outlets.find((outlet) => outlet.value === product.outlet_Id);
+    if (!token) throw new Error("User is not authenticated");
 
-      return {
-        id: product.id,
-        name: product.name,
-        quantity: product.quantity,
-        price: product.price,
-        category: product.categoryName,
-        barcode: product.barCode || "N/A",
-        outlet_Name: outlet ? outlet.label : "N/A", // Map outlet name if available
-        supplier: supplier ? supplier.supplierName : "N/A",
-        isLowStockWarring: product.isLowStockWarring || "N/A",
-        actions: (
-          <>
-            <IconButton onClick={() => handleEditClick(product)}>
-              <EditIcon />
-            </IconButton>
-            <IconButton onClick={() => handleDeleteProduct(product.id)}>
-              <DeleteIcon />
-            </IconButton>
-          </>
-        ),
-      };
+    const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
+      headers: { 'Authorization': `Bearer ${token}` }
+
     });
-  };
+
+    console.log("API Response:", response); // Log the full response
+    console.log("Response Data:", response.data); // Log the data property specifically
+
+    const mappedOutlets = response.data.map(outlet => ({
+      value: outlet.id,
+      label: outlet.outlet_Name
+    }));
+
+    setOutlets(mappedOutlets);
+  } catch (error) {
+    console.error("Error fetching outlet data:", error); // Log the error in case of failure
+    toast.error("Failed to fetch outlets.");
+  }
+};
+const formatProductData = (products) => {
+  return products.map((product) => {
+      return {
+      id: product.id,
+      name: product.name,
+      quantity: product.quantity,
+      price: product.price,
+      category: product.categoryName,
+      barcode: product.barCode || "N/A",
+      supplier:product.supplierName,
+      outlet: product.outlet_Name,
+      isLowStockWarring: product.isLowStockWarring || "N/A",
+      actions: (
+        <>
+          <IconButton onClick={() => handleEditClick(product)}>
+            <EditIcon />
+          </IconButton>
+          <IconButton onClick={() => handleDeleteProduct(product.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </>
+      ),
+    };
+  });
+};
+
 
   const handleEditClick = (product) => {
     setEditingProduct(product);
@@ -119,8 +144,11 @@ const Product = () => {
       category: product.categoryId,
       barCode: product.barCode,
       supplierId: product.supplierId,
-      outlet_Id: product.outlet_Id,
-      isLowStockWarring: product.isLowStockWarring || "",
+
+      Outlet_Id: product.Outlet_Id,  // Ensure this field matches the outlet ID
+      // image: product.image.includes('https') ? product.image : null,
+      isLowStockWarring: product.isLowStockWarring || "", // Populate the field with existing data
+
     });
     setIsModalOpen((prev) => ({ ...prev, edit: true }));
   };
@@ -135,8 +163,11 @@ const Product = () => {
     formData.append("CatId", newProduct.category);
     formData.append("Barcode", newProduct.barCode);
     formData.append("SupplierId", newProduct.supplierId);
-    formData.append("outlet_Id", newProduct.outlet_Id);
-    formData.append("IsLowStockWarring", newProduct.isLowStockWarring);
+
+    formData.append("Outlet_Id", newProduct.Outlet_Id);  // Append outlet ID to form data
+    formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
+    // if (newProduct.image) formData.append("imageFile", newProduct.image);
+
 
     try {
       await axios.put(UpdateProduct, formData);
@@ -157,8 +188,10 @@ const Product = () => {
     formData.append("CatId", newProduct.category);
     formData.append("Barcode", newProduct.barCode);
     formData.append("SupplierId", newProduct.supplierId);
-    formData.append("outlet_Id", newProduct.outlet_Id);
-    formData.append("IsLowStockWarring", newProduct.isLowStockWarring);
+
+    formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
+    // if (newProduct.image) formData.append("imageFile", newProduct.image);
+    formData.append("Outlet_Id", newProduct.Outlet_Id);  // Append outlet ID to form data
 
     try {
       await axios.post(AddProduct, formData);
@@ -280,21 +313,24 @@ const Product = () => {
                 </IconButton>
               </MDBox>
               <DataTable
-                table={{
-                  columns: [
-                    { Header: "Name", accessor: "name" },
-                    { Header: "Quantity", accessor: "quantity" },
-                    { Header: "Price", accessor: "price" },
-                    { Header: "Category", accessor: "category" },
-                    { Header: "Barcode", accessor: "barcode" },
-                    { Header: "Supplier", accessor: "supplier" },
-                    { Header: "Outlet Name", accessor: "outlet_Name" },
-                    { Header: "Low Stock Warning", accessor: "isLowStockWarring" },
-                    { Header: "Actions", accessor: "actions" },
-                  ],
-                  rows: filteredProducts,
-                }}
-              />
+
+  table={{
+    columns: [
+      { Header: "Name", accessor: "name" },
+      { Header: "Quantity", accessor: "quantity" },
+      { Header: "Price", accessor: "price" },
+      { Header: "Category", accessor: "category" },
+      { Header: "Barcode", accessor: "barcode" },
+      { Header: "Supplier", accessor: "supplier" },
+      { Header: "Outlet", accessor: "outlet" }, // Outlet column added
+      { Header: "Low Stock Warning", accessor: "isLowStockWarring" }, // New column for low stock warning
+      { Header: "Actions", accessor: "actions" },
+    ],
+    rows: filteredProducts, // Use the filtered product data
+  }}
+/>
+
+
             </Card>
           </Grid>
         </Grid>
@@ -337,7 +373,62 @@ const Product = () => {
             </form>
           </div>
         </div>
-      )}
+
+        <div style={modalStyles.inputContainer}>
+          <button type="button" onClick={generateBarcode} style={modalStyles.button}>
+            Generate Barcode
+          </button>
+          <label style={modalStyles.label}>
+            Supplier
+            <select
+              name="supplierId"
+              style={{ ...modalStyles.input, flex: 1 }}
+              value={newProduct.supplierId}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Supplier</option>
+              {suppliers.map((supplier) => (
+                <option key={supplier.id} value={supplier.id}>
+                  {supplier.supplierName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div style={modalStyles.inputContainer}>
+                <label style={modalStyles.label}>
+                  Outlet
+                  <select
+                    name="Outlet_Id"
+                    style={modalStyles.input}
+                    value={newProduct.Outlet_Id}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Outlet</option>
+                    {outlets.map((outlet) => (
+                      <option key={outlet.value} value={outlet.value}>
+                        {outlet.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+        <div style={modalStyles.footer}>
+          <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
+            Cancel
+          </button>
+          <button type="submit" style={modalStyles.submitButton}>
+            {editingProduct ? "Update" : "Add"} Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
+
     </DashboardLayout>
   );
 };

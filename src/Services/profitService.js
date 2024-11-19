@@ -4,7 +4,12 @@ import { DayProfit,GetWeeklyProfits,MonthProfit,YearProfit,GetDailyProfitsData,G
 
 export const GetDayProfit = async () => {
     try {
-        const response = await axios.get(DayProfit);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(DayProfit, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching daily Profit:', error);
@@ -13,7 +18,12 @@ export const GetDayProfit = async () => {
 };
 export const GetWeeklyProfit = async () => {
     try {
-        const response = await axios.get(GetWeeklyProfits);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetWeeklyProfits, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching Weekly Profit:', error);
@@ -22,7 +32,12 @@ export const GetWeeklyProfit = async () => {
 };
 export const GetMonthProfit = async () => {
     try {
-        const response = await axios.get(MonthProfit);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(MonthProfit, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching Month Profit:', error);
@@ -31,7 +46,12 @@ export const GetMonthProfit = async () => {
 };
 export const GetYearProfit = async () => {
     try {
-        const response = await axios.get(YearProfit);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(YearProfit, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching Year Profit:', error);
@@ -40,7 +60,12 @@ export const GetYearProfit = async () => {
 };
 export const GetDailyProfitData = async () => {
     try {
-        const response = await axios.get(GetDailyProfitsData);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetDailyProfitsData, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching Daily Profit:', error);
@@ -49,7 +74,12 @@ export const GetDailyProfitData = async () => {
 };
 export const GetWeeklyProfitData = async () => {
     try {
-        const response = await axios.get(GetWeeklyProfitsData);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetWeeklyProfitsData, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly profit data:', error);
@@ -58,7 +88,12 @@ export const GetWeeklyProfitData = async () => {
 };
 export const GetYearlyProfitData = async () => {
     try {
-        const response = await axios.get(GetYearlyProfitsData);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetYearlyProfitsData, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching Yearly data:', error);
