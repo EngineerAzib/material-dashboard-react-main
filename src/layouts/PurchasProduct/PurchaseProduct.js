@@ -19,6 +19,7 @@ import "react-toastify/dist/ReactToastify.css";
 const PurchaseOrder = () => {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  
   const [suppliers, setSuppliers] = useState([]);
   const [outlets, setOutlets] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);

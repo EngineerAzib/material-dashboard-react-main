@@ -7,9 +7,10 @@ export const getDailyRevenue = async () => {
     try {
         const token = localStorage.getItem("accessToken");
         const response = await axios.get(GetDailyRevenues, {
-            headers: {
+    headers: {
               Authorization: `Bearer ${token}`
             }
+
           });
         return response.data;
     } catch (error) {
