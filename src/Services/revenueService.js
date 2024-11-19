@@ -5,7 +5,10 @@ import { GetDailyRevenues,GetWeeklyRevenues,GetMonthlyRevenues,GetYearlyRevenues
 
 export const getDailyRevenue = async () => {
     try {
-        const response = await axios.get(GetDailyRevenues);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetDailyRevenues, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching daily revenue:', error);

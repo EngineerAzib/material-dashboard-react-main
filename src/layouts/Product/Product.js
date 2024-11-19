@@ -13,11 +13,13 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { GetProduct,AddProduct,UpdateProduct ,DeleteProduct,getSupplier,GetCatagory } from "layouts/Api";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { GetProduct, AddProduct, UpdateProduct, DeleteProduct, getSupplier, GetCatagory } from "layouts/Api";
+
 const Product = () => {
   const [products, setProducts] = useState([]);
+  const [outlets, setOutlets] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -26,44 +28,72 @@ const Product = () => {
     quantity: "",
     price: "",
     category: "",
-    // image: null,
     barCode: "",
     supplierId: "",
-    isLowStockWarring: "", // New field for low stock warning
+    outlet_Id: "",
+    isLowStockWarring: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState({ add: false, edit: false });
 
   useEffect(() => {
     fetchInitialData();
+    fetchOutlets();
   }, []);
 
   const fetchInitialData = async () => {
     try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const headers = { Authorization: `Bearer ${token}` };
       const [suppliersResponse, categoriesResponse, productsResponse] = await Promise.all([
-        axios.get(getSupplier),
-        axios.get(GetCatagory),
-        axios.get(GetProduct),
+        axios.get(getSupplier, { headers }),
+        axios.get(GetCatagory, { headers }),
+        axios.get(GetProduct, { headers }),
       ]);
+
       setSuppliers(suppliersResponse.data || []);
       setCategories(categoriesResponse.data || []);
-      setProducts(formatProductData(productsResponse.data || [], suppliersResponse.data || []));
+      setProducts(formatProductData(productsResponse.data || []));
     } catch (error) {
+      console.error("Error fetching initial data:", error);
       toast.error("Failed to fetch data.");
     }
   };
 
-  const formatProductData = (products, suppliers) => {
+  const fetchOutlets = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("User is not authenticated");
+
+      const response = await axios.get("https://localhost:7171/api/OutLets/GetOutLets", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const mappedOutlets = response.data.map((outlet) => ({
+        value: outlet.id,
+        label: outlet.outlet_Name,
+      }));
+      setOutlets(mappedOutlets);
+    } catch (error) {
+      console.error("Error fetching outlet data:", error);
+      toast.error("Failed to fetch outlets.");
+    }
+  };
+
+  const formatProductData = (products) => {
     return products.map((product) => {
-      const supplier = suppliers.find(supplier => supplier.id === product.supplierId);
+      const supplier = suppliers.find((supplier) => supplier.id === product.supplierId);
+      const outlet = outlets.find((outlet) => outlet.value === product.outlet_Id);
+
       return {
         id: product.id,
         name: product.name,
         quantity: product.quantity,
         price: product.price,
         category: product.categoryName,
-        // image: product.image.includes('/images/') ? `https://localhost:7171${product.image}` : product.image,
         barcode: product.barCode || "N/A",
+        outlet_Name: outlet ? outlet.label : "N/A", // Map outlet name if available
         supplier: supplier ? supplier.supplierName : "N/A",
         isLowStockWarring: product.isLowStockWarring || "N/A",
         actions: (
@@ -80,11 +110,6 @@ const Product = () => {
     });
   };
 
-  const generateBarcode = () => {
-    const barCode = Math.floor(1000000 + Math.random() * 9000000).toString();
-    setNewProduct((prev) => ({ ...prev, barCode }));
-  };
-
   const handleEditClick = (product) => {
     setEditingProduct(product);
     setNewProduct({
@@ -94,8 +119,8 @@ const Product = () => {
       category: product.categoryId,
       barCode: product.barCode,
       supplierId: product.supplierId,
-      // image: product.image.includes('https') ? product.image : null,
-      isLowStockWarring: product.isLowStockWarring || "", // Populate the field with existing data
+      outlet_Id: product.outlet_Id,
+      isLowStockWarring: product.isLowStockWarring || "",
     });
     setIsModalOpen((prev) => ({ ...prev, edit: true }));
   };
@@ -110,8 +135,8 @@ const Product = () => {
     formData.append("CatId", newProduct.category);
     formData.append("Barcode", newProduct.barCode);
     formData.append("SupplierId", newProduct.supplierId);
-    formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
-    // if (newProduct.image) formData.append("imageFile", newProduct.image);
+    formData.append("outlet_Id", newProduct.outlet_Id);
+    formData.append("IsLowStockWarring", newProduct.isLowStockWarring);
 
     try {
       await axios.put(UpdateProduct, formData);
@@ -132,8 +157,8 @@ const Product = () => {
     formData.append("CatId", newProduct.category);
     formData.append("Barcode", newProduct.barCode);
     formData.append("SupplierId", newProduct.supplierId);
-    formData.append("IsLowStockWarring", newProduct.isLowStockWarring); // Include low stock warning
-    // if (newProduct.image) formData.append("imageFile", newProduct.image);
+    formData.append("outlet_Id", newProduct.outlet_Id);
+    formData.append("IsLowStockWarring", newProduct.isLowStockWarring);
 
     try {
       await axios.post(AddProduct, formData);
@@ -156,10 +181,10 @@ const Product = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
     setNewProduct((prev) => ({
       ...prev,
-      [name]: name === "isLowStockWarring" ? parseInt(value, 10) : files ? files[0] : value,
+      [name]: name === "isLowStockWarring" ? parseInt(value, 10) : value,
     }));
   };
 
@@ -177,107 +202,63 @@ const Product = () => {
       category: "",
       barCode: "",
       supplierId: "",
-      // image: null,
-      isLowStockWarring: "", // Reset on close
+      outlet_Id: "",
+      isLowStockWarring: "",
     });
   };
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
-  
+
   const modalStyles = {
-    label :{
-      display: 'flex',
-      flexDirection: 'column',
-      flex: 1,
-      marginRight: '10px', /* Or any spacing you need */
-      fontSize:"11px"
-    },
+    label: { display: "flex", flexDirection: "column", flex: 1, fontSize: "11px" },
     button: {
-      padding: '10px',
-        backgroundColor: '#344767',
-        color: 'white',
-        border: 'none',
-        cursor: 'pointer',
-        borderRadius: '5px',
-        fontSize: '16px',
-        marginleft: '10px',
+      padding: "10px",
+      backgroundColor: "#344767",
+      color: "white",
+      borderRadius: "5px",
+      fontSize: "16px",
     },
-    input: {
-      width: '100%',
-      padding: '10px',
-      border: '1px solid #ccc',
-      borderRadius: '5px',
-  },
+    input: { width: "100%", padding: "10px", borderRadius: "5px" },
     overlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 2000, // Increase z-index value to ensure modal appears above other content
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 2000,
     },
     modal: {
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '10px',
-        width: '400px',
-        maxWidth: '80%',
-        position: 'relative',
-        zIndex: 2100, // Optional: set z-index for modal itself
+      backgroundColor: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      width: "400px",
+      maxWidth: "80%",
+      position: "relative",
+      zIndex: 2100,
     },
-    header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '20px',
-    },
-    closeButton: {
-        background: 'none',
-        border: 'none',
-        fontSize: '24px',
-        cursor: 'pointer',
-        color: '#344767',
-    },
-    inputContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        gap: '10px', // Space between the input fields
-        marginBottom: '15px',
-    },
-   
-    footer: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-        marginTop: '20px',
-    },
+    footer: { display: "flex", justifyContent: "flex-end", marginTop: "20px" },
     submitButton: {
-        padding: '10px 20px',
-        backgroundColor: '#344767',
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-        fontSize: '16px',
+      padding: "10px 20px",
+      backgroundColor: "#344767",
+      color: "white",
+      borderRadius: "5px",
+      fontSize: "16px",
     },
     cancelButton: {
-        padding: '10px 20px',
-        backgroundColor: '#f44336',
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-        fontSize: '16px',
-        marginRight: '10px',
+      padding: "10px 20px",
+      backgroundColor: "#f44336",
+      color: "white",
+      borderRadius: "5px",
+      fontSize: "16px",
+      marginRight: "10px",
     },
-};
-
+  };
 
   return (
     <DashboardLayout>
@@ -299,155 +280,64 @@ const Product = () => {
                 </IconButton>
               </MDBox>
               <DataTable
-  table={{
-    columns: [
-      { Header: "Name", accessor: "name" },
-      { Header: "Quantity", accessor: "quantity" },
-      { Header: "Price", accessor: "price" },
-      { Header: "Category", accessor: "category" },
-      { Header: "Barcode", accessor: "barcode" },
-      { Header: "Supplier", accessor: "supplier" },
-      { Header: "Low Stock Warning", accessor: "isLowStockWarring" }, // New column for low stock warning
-      { Header: "Actions", accessor: "actions" },
-    ],
-    rows: filteredProducts, // Use the filtered product data
-  }}
-/>
-
+                table={{
+                  columns: [
+                    { Header: "Name", accessor: "name" },
+                    { Header: "Quantity", accessor: "quantity" },
+                    { Header: "Price", accessor: "price" },
+                    { Header: "Category", accessor: "category" },
+                    { Header: "Barcode", accessor: "barcode" },
+                    { Header: "Supplier", accessor: "supplier" },
+                    { Header: "Outlet Name", accessor: "outlet_Name" },
+                    { Header: "Low Stock Warning", accessor: "isLowStockWarring" },
+                    { Header: "Actions", accessor: "actions" },
+                  ],
+                  rows: filteredProducts,
+                }}
+              />
             </Card>
           </Grid>
         </Grid>
       </MDBox>
       <Footer />
       <ToastContainer />
+
       {/* Add and Edit Modal */}
       {(isModalOpen.add || isModalOpen.edit) && (
-  <div style={modalStyles.overlay}>
-    <div style={modalStyles.modal}>
-      <div style={modalStyles.header}>
-        <h3>{editingProduct ? "Edit Product" : "Add Product"}</h3>
-        <button style={modalStyles.closeButton} onClick={closeModal}>×</button>
-      </div>
-      <form onSubmit={editingProduct ? handleEditProduct : handleAddProduct}>
-        {/* Row for Product Name and Quantity */}
-        <div style={modalStyles.inputContainer}>
-          <label style={modalStyles.label}>
-            Product Name
-            <input
-              type="text"
-              name="name"
-              placeholder="Product Name"
-              style={{ ...modalStyles.input, flex: 1, marginRight: '10px' }}
-              value={newProduct.name}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Quantity
-            <input
-              type="number"
-              name="quantity"
-              placeholder="Quantity"
-              style={{ ...modalStyles.input, flex: 1 }}
-              value={newProduct.quantity}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
+        <div style={modalStyles.overlay}>
+          <div style={modalStyles.modal}>
+            <h3>{editingProduct ? "Edit Product" : "Add Product"}</h3>
+            <form onSubmit={editingProduct ? handleEditProduct : handleAddProduct}>
+              {/* Input fields for Product details */}
+              <label style={modalStyles.label}>
+                Outlet
+                <select
+                  name="outlet_Id"
+                  style={modalStyles.input}
+                  value={newProduct.outlet_Id}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Outlet</option>
+                  {outlets.map((outlet) => (
+                    <option key={outlet.value} value={outlet.value}>
+                      {outlet.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div style={modalStyles.footer}>
+                <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
+                  Cancel
+                </button>
+                <button type="submit" style={modalStyles.submitButton}>
+                  {editingProduct ? "Update" : "Add"} Product
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        {/* Row for Price and Low Stock Warning */}
-        <div style={modalStyles.inputContainer}>
-          <label style={modalStyles.label}>
-            Price
-            <input
-              type="number"
-              name="price"
-              placeholder="Price"
-              style={{ ...modalStyles.input, flex: 1, marginRight: '10px' }}
-              value={newProduct.price}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Low Stock Warning (Quantity)
-            <input
-              type="number"
-              name="isLowStockWarring"
-              placeholder="Low Stock Warning (Quantity)"
-              style={{ ...modalStyles.input, flex: 1 }}
-              value={newProduct.isLowStockWarring}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-        </div>
-        <div style={modalStyles.inputContainer}>
-          <label style={modalStyles.label}>
-            Barcode
-            <input
-              type="text"
-              name="barCode"
-              placeholder="Barcode"
-              style={{ ...modalStyles.input, flex: 1 }}
-              value={newProduct.barCode}
-              onChange={handleInputChange}
-            />
-          </label>
-          <label style={modalStyles.label}>
-            Category
-            <select
-              name="category"
-              style={{ ...modalStyles.input, flex: 1 }}
-              value={newProduct.category}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.catName}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div style={modalStyles.inputContainer}>
-          <button type="button" onClick={generateBarcode} style={modalStyles.button}>
-            Generate Barcode
-          </button>
-          <label style={modalStyles.label}>
-            Supplier
-            <select
-              name="supplierId"
-              style={{ ...modalStyles.input, flex: 1 }}
-              value={newProduct.supplierId}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Select Supplier</option>
-              {suppliers.map((supplier) => (
-                <option key={supplier.id} value={supplier.id}>
-                  {supplier.supplierName}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div style={modalStyles.footer}>
-          <button type="button" onClick={closeModal} style={modalStyles.cancelButton}>
-            Cancel
-          </button>
-          <button type="submit" style={modalStyles.submitButton}>
-            {editingProduct ? "Update" : "Add"} Product
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
+      )}
     </DashboardLayout>
   );
 };
