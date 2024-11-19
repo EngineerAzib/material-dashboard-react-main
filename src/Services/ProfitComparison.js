@@ -4,7 +4,12 @@ import { GetDayProfit,GetWeekProfitProfit,GetMonthProfit,GetYearProfit } from "l
 
 export const GetDayProfitComparison = async () => {
     try {
-        const response = await axios.get(GetDayProfit);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetDayProfit, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetDailySaleMinusPaymentReceived', error);
@@ -13,7 +18,12 @@ export const GetDayProfitComparison = async () => {
 };
 export const GetWeekProfitComparison = async () => {
     try {
-        const response = await axios.get(GetWeekProfitProfit);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetWeekProfitProfit, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetWeekProfitComparison', error);
@@ -22,7 +32,12 @@ export const GetWeekProfitComparison = async () => {
 };
 export const GetMonthProfitComparison = async () => {
     try {
-        const response = await axios.get(GetMonthProfit);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetMonthProfit, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetMonthlySaleMinusPaymentReceived', error);
@@ -31,7 +46,12 @@ export const GetMonthProfitComparison = async () => {
 };
 export const GetYearProfitComparison = async () => {
     try {
-        const response = await axios.get(GetYearProfit);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetYearProfit, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetYearProfitComparison:', error);

@@ -5,7 +5,12 @@ import { GetTotalDalySales,GetTotalWeeklySales,GetTotalMonthlySales,GetWeeklySal
 
 export const GetTotalDalySale = async () => {
     try {
-        const response = await axios.get(GetTotalDalySales);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetTotalDalySales, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching daily revenue:', error);
@@ -14,7 +19,12 @@ export const GetTotalDalySale = async () => {
 };
 export const GetTotalWeeklySale = async () => {
     try {
-        const response = await axios.get(GetTotalWeeklySales);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetTotalWeeklySales, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching GetTotalWeeklySale:', error);
@@ -23,7 +33,12 @@ export const GetTotalWeeklySale = async () => {
 };
 export const GetTotalMonthlySale = async () => {
     try {
-        const response = await axios.get(GetTotalMonthlySales);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetTotalMonthlySales, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching daily revenue:', error);
@@ -32,7 +47,12 @@ export const GetTotalMonthlySale = async () => {
 };
 export const GetTotalYearlySale = async () => {
     try {
-        const response = await axios.get(GetTotalYearlySales);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetTotalYearlySales, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching daily revenue:', error);
@@ -41,7 +61,12 @@ export const GetTotalYearlySale = async () => {
 };
 export const GetWeeklySales = async () => {
     try {
-        const response = await axios.get(GetWeeklySale);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetWeeklySale, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly sales data:', error);
@@ -50,7 +75,12 @@ export const GetWeeklySales = async () => {
 };
 export const GetDailySales = async () => {
     try {
-        const response = await axios.get(GetDailySale);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetDailySale, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly sales data:', error);
@@ -59,7 +89,12 @@ export const GetDailySales = async () => {
 };
 export const GetYearlySales = async () => {
     try {
-        const response = await axios.get(GetYearlySale);
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(GetYearlySale, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         return response.data;
     } catch (error) {
         console.error('Error fetching weekly sales data:', error);
