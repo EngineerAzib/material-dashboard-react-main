@@ -355,7 +355,7 @@ const Outlets = () => {
                   style={modalStyles.input}
                 />
                   <MDInput
-                  type="text"
+                  type="password"
                   name="password"
                   value={newOutlet.password}
                   onChange={handleInputChange}

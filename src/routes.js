@@ -47,7 +47,7 @@ const isAdmin = async () => {
     const token = localStorage.getItem('accessToken'); 
 
     // Make the API request with the Authorization header
-    const response = await axios.get('https://localhost:7171/api/UserAuthentication/GetCompany', {
+    const response = await axios.get('https://localhost:7171/api/UserAuthentication/GetRoles', {
       headers: {
         'accept': '*/*',
         'Authorization': `Bearer ${token}`

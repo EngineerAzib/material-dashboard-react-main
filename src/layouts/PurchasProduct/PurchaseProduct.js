@@ -98,10 +98,10 @@ const PurchaseOrder = () => {
         orderStatus: order.orderStatus ? "Completed" : "Pending",
         paymentStatus: order.paymentStatus ? "Paid" : "Unpaid",
         unitPrice: order.unitPrice,
-        totalPrice: order.totalPrice,
+        totalPrice: order.unitPrice*order.orderQuantity,
         orderQuantity: order.orderQuantity,
         receiveQuantity: order.receiveQuantity,
-        totalPayment: order.totalPayment,
+        totalPayment:  order.unitPrice*order.orderQuantity,
         paidPayment: order.paidPayment,
         
         product: order.productName,
@@ -133,10 +133,10 @@ const PurchaseOrder = () => {
       orderStatus: order.orderStatus,
       paymentStatus: order.paymentStatus,
       unitPrice: order.unitPrice,
-      totalPrice: order.totalPrice,
+      totalPrice: order.unitPrice*order.orderQuantity,
       orderQuantity: order.orderQuantity,
       receiveQuantity: order.receiveQuantity,
-      totalPayment: order.totalPayment,
+      totalPayment:  order.unitPrice*order.orderQuantity,
       paidPayment: order.paidPayment,
       productId: order.productId,
       suplierId: order.suplierId,
@@ -172,10 +172,10 @@ const PurchaseOrder = () => {
                   orderStatus: newOrder.orderStatus,
                   paymentStatus: newOrder.paymentStatus,
                   unitPrice: newOrder.unitPrice,
-                  totalPrice: newOrder.totalPrice,
+                  totalPrice: newOrder.unitPrice*newOrder.orderQuantity,
                   orderQuantity: newOrder.orderQuantity,
                   receiveQuantity: newOrder.receiveQuantity,
-                  totalPayment: newOrder.totalPayment,
+                  totalPayment:newOrder.unitPrice*newOrder.orderQuantity,
                   paidPayment: newOrder.paidPayment,
                   productId: newOrder.productId,
                   supplierId: newOrder.supplierId,
@@ -513,7 +513,7 @@ const PurchaseOrder = () => {
                 <MDInput
                   type="number"
                   name="totalPrice"
-                  value={newOrder.totalPrice}
+                  value={newOrder.unitPrice*newOrder.orderQuantity}
                   onChange={handleInputChange}
                   placeholder="Total Price"
                   style={modalStyles.input}
@@ -540,7 +540,7 @@ const PurchaseOrder = () => {
                 <MDInput
                   type="number"
                   name="totalPayment"
-                  value={newOrder.totalPayment}
+                  value={newOrder.unitPrice*newOrder.orderQuantity}
                   onChange={handleInputChange}
                   placeholder="Total Payment"
                   style={modalStyles.input}
